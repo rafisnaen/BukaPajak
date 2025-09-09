@@ -1,0 +1,94 @@
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Building2, Menu, Wallet } from "lucide-react";
+import { useState } from "react";
+
+const Header = () => {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  return (
+    <header className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-b border-border/50 shadow-card">
+      <div className="container mx-auto px-6">
+        <div className="flex items-center justify-between h-16">
+          {/* Logo */}
+          <div className="flex items-center space-x-3">
+            <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-primary">
+              <Building2 className="w-6 h-6 text-white" />
+            </div>
+            <div>
+              <h1 className="text-lg font-bold text-foreground">GovChain ID</h1>
+              <p className="text-xs text-muted-foreground">Transparency Platform</p>
+            </div>
+          </div>
+
+          {/* Navigation - Desktop */}
+          <nav className="hidden md:flex items-center space-x-8">
+            <a href="#dashboard" className="text-foreground hover:text-primary transition-smooth">
+              Dashboard
+            </a>
+            <a href="#regional" className="text-foreground hover:text-primary transition-smooth">
+              Regional
+            </a>
+            <a href="#transparency" className="text-foreground hover:text-primary transition-smooth">
+              Transparansi
+            </a>
+            <a href="#about" className="text-foreground hover:text-primary transition-smooth">
+              Tentang
+            </a>
+          </nav>
+
+          {/* Actions */}
+          <div className="flex items-center space-x-4">
+            {/* Web3 Status */}
+            <Badge variant="secondary" className="hidden sm:flex items-center space-x-2">
+              <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse-glow" />
+              <span>Web3 Connected</span>
+            </Badge>
+
+            {/* Connect Wallet Button */}
+            <Button size="sm" className="hidden sm:flex items-center space-x-2">
+              <Wallet className="w-4 h-4" />
+              <span>Connect Wallet</span>
+            </Button>
+
+            {/* Mobile Menu Button */}
+            <Button
+              variant="ghost"
+              size="sm"
+              className="md:hidden"
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+            >
+              <Menu className="w-5 h-5" />
+            </Button>
+          </div>
+        </div>
+
+        {/* Mobile Navigation */}
+        {isMenuOpen && (
+          <div className="md:hidden py-4 border-t border-border/50">
+            <nav className="flex flex-col space-y-4">
+              <a href="#dashboard" className="text-foreground hover:text-primary transition-smooth">
+                Dashboard
+              </a>
+              <a href="#regional" className="text-foreground hover:text-primary transition-smooth">
+                Regional
+              </a>
+              <a href="#transparency" className="text-foreground hover:text-primary transition-smooth">
+                Transparansi
+              </a>
+              <a href="#about" className="text-foreground hover:text-primary transition-smooth">
+                Tentang
+              </a>
+              <Button size="sm" className="flex items-center space-x-2 w-fit">
+                <Wallet className="w-4 h-4" />
+                <span>Connect Wallet</span>
+              </Button>
+            </nav>
+          </div>
+        )}
+      </div>
+    </header>
+  );
+};
+
+export default Header;
