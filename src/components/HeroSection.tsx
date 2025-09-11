@@ -13,7 +13,7 @@ const HeroSection = () => {
       />
       
       {/* Hero Content */}
-      <div className="relative z-10 container mx-auto px-6 text-center">
+      <div className="relative z-10 container mx-auto px-6 text-center pt-24">
         <div className="max-w-4xl mx-auto">
           {/* Badge */}
           <div className="inline-flex items-center px-4 py-2 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 mb-8">
@@ -35,20 +35,20 @@ const HeroSection = () => {
 
           {/* CTA Buttons */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16">
-            <Button size="lg" className="bg-white text-primary hover:bg-white/90 shadow-elevated">
+            <Button size="lg" className="bg-white text-primary shadow-elevated hover:bg-white/10 backdrop-blur-sm">
               Lihat Dashboard
             </Button>
             <Button 
               size="lg" 
               variant="outline" 
-              className="border-white/30 text-white hover:bg-white/10 backdrop-blur-sm"
+              className="bg-white text-primary shadow-elevated hover:bg-white/10 backdrop-blur-sm"
             >
               Pelajari Lebih Lanjut
             </Button>
           </div>
 
           {/* Stats Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto -mt-8">
             <Card className="p-6 bg-white/10 backdrop-blur-sm border-white/20 text-center">
               <div className="flex items-center justify-center w-12 h-12 rounded-full bg-accent/20 mx-auto mb-4">
                 <Users className="w-6 h-6 text-accent" />
