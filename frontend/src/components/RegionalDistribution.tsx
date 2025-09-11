@@ -64,6 +64,31 @@ const RegionalDistribution = () => {
     }).format(amount);
   };
 
+const formatLargeCurrency = (amount: number) => {
+  if (amount >= 1e12) {
+    // Format menjadi Triliun
+    const value = (amount / 1e12).toFixed(1).replace('.', ',');
+    return `Rp ${value} T`;
+  }
+  if (amount >= 1e9) {
+    // Format menjadi Miliar
+    const value = (amount / 1e9).toFixed(1).replace('.', ',');
+    return `Rp ${value} M`;
+  }
+  if (amount >= 1e6) {
+    // Format menjadi Juta
+    const value = (amount / 1e6).toFixed(1).replace('.', ',');
+    return `Rp ${value} Jt`;
+  }
+  // Jika lebih kecil, gunakan format standar
+  return new Intl.NumberFormat('id-ID', {
+    style: 'currency',
+    currency: 'IDR',
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0
+  }).format(amount);
+};
+
   return (
     <section className="py-20 bg-background">
       <div className="container mx-auto px-6">
@@ -87,7 +112,7 @@ const RegionalDistribution = () => {
             <CardContent className="p-6 text-center">
               <TrendingUp className="w-8 h-8 text-primary mx-auto mb-3" />
               <h3 className="text-2xl font-bold text-foreground mb-1">
-                {formatCurrency(16900000000000)}
+                {formatLargeCurrency(16900000000000)}
               </h3>
               <p className="text-muted-foreground">Total Alokasi</p>
             </CardContent>

@@ -13,7 +13,7 @@ const Footer = () => {
                 <Building2 className="w-7 h-7 text-accent" />
               </div>
               <div>
-                <h3 className="text-2xl font-bold">GovChain ID</h3>
+                <h3 className="text-2xl font-bold">BukaPajak</h3>
                 <p className="text-primary-foreground/80">Transparency Platform</p>
               </div>
             </div>
@@ -63,7 +63,7 @@ const Footer = () => {
         {/* Bottom Bar */}
         <div className="border-t border-white/10 mt-12 pt-8 flex flex-col md:flex-row items-center justify-between">
           <p className="text-primary-foreground/60 text-sm">
-            © 2024 GovChain ID. Semua hak dilindungi undang-undang.
+            © 2025  BukaPajak. Semua hak dilindungi undang-undang.
           </p>
           <p className="text-primary-foreground/60 text-sm mt-4 md:mt-0">
             Powered by Blockchain Technology
