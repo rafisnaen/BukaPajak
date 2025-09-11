@@ -1,5 +1,5 @@
 # Environment variables
-.env
+./env
 .env.local
 .env.development
 .env.production
@@ -7,8 +7,8 @@
 
 # Go specific
 /bin/
-/go.sum
-/go.mod~
+./go.sum
+./go.mod~
 
 # IDE and editor files
 .vscode/
