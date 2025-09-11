@@ -1,29 +1,34 @@
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Building2, Menu, Wallet } from "lucide-react";
+import { Building2, Menu } from "lucide-react";
 import { useState } from "react";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  // Fungsi untuk menutup menu mobile saat link diklik
+  const handleLinkClick = () => {
+    setIsMenuOpen(false);
+  };
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-b border-border/50 shadow-card">
       <div className="container mx-auto px-6">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <div className="flex items-center space-x-3">
+          <a href="/" className="flex items-center space-x-3" onClick={handleLinkClick}>
             <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-primary">
               <Building2 className="w-6 h-6 text-white" />
             </div>
             <div>
-              <h1 className="text-lg font-bold text-foreground">GovChain ID</h1>
+              <h1 className="text-lg font-bold text-foreground">BukaPajak</h1>
               <p className="text-xs text-muted-foreground">Transparency Platform</p>
             </div>
-          </div>
+          </a>
 
-          {/* Navigation - Desktop */}
+          {/* Navigation - Desktop (Biarkan <a> karena ini anchor link) */}
           <nav className="hidden md:flex items-center space-x-8">
-            <a href="#dashboard" className="text-foreground hover:text-primary transition-smooth">
+            {/* Tombol Dashboard diubah di sini */}
+            <a href="/" className="text-foreground hover:text-primary transition-smooth">
               Dashboard
             </a>
             <a href="#regional" className="text-foreground hover:text-primary transition-smooth">
@@ -38,18 +43,18 @@ const Header = () => {
           </nav>
 
           {/* Actions */}
-          <div className="flex items-center space-x-4">
-            {/* Web3 Status */}
-            <Badge variant="secondary" className="hidden sm:flex items-center space-x-2">
-              <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse-glow" />
-              <span>Web3 Connected</span>
-            </Badge>
-
-            {/* Connect Wallet Button */}
-            <Button size="sm" className="hidden sm:flex items-center space-x-2">
-              <Wallet className="w-4 h-4" />
-              <span>Connect Wallet</span>
-            </Button>
+          <div className="flex items-center space-x-2">
+            {/* Login & Register Buttons - Desktop */}
+            <a href="/login">
+              <Button variant="ghost" size="sm" className="hidden sm:flex">
+                Login
+              </Button>
+            </a>
+            <a href="/register">
+              <Button size="sm" className="hidden sm:flex">
+                Register
+              </Button>
+            </a>
 
             {/* Mobile Menu Button */}
             <Button
@@ -67,22 +72,31 @@ const Header = () => {
         {isMenuOpen && (
           <div className="md:hidden py-4 border-t border-border/50">
             <nav className="flex flex-col space-y-4">
-              <a href="#dashboard" className="text-foreground hover:text-primary transition-smooth">
+              <a href="#dashboard" onClick={handleLinkClick} className="text-foreground hover:text-primary transition-smooth">
                 Dashboard
               </a>
-              <a href="#regional" className="text-foreground hover:text-primary transition-smooth">
+              <a href="#regional" onClick={handleLinkClick} className="text-foreground hover:text-primary transition-smooth">
                 Regional
               </a>
-              <a href="#transparency" className="text-foreground hover:text-primary transition-smooth">
+              <a href="#transparency" onClick={handleLinkClick} className="text-foreground hover:text-primary transition-smooth">
                 Transparansi
               </a>
-              <a href="#about" className="text-foreground hover:text-primary transition-smooth">
+              <a href="#about" onClick={handleLinkClick} className="text-foreground hover:text-primary transition-smooth">
                 Tentang
               </a>
-              <Button size="sm" className="flex items-center space-x-2 w-fit">
-                <Wallet className="w-4 h-4" />
-                <span>Connect Wallet</span>
-              </Button>
+              {/* Login & Register Buttons - Mobile */}
+              <div className="flex flex-col space-y-2 pt-2">
+                <a href="/login" onClick={handleLinkClick}>
+                  <Button variant="ghost" size="sm" className="w-full justify-start">
+                    Login
+                  </Button>
+                </a>
+                <a href="/register" onClick={handleLinkClick}>
+                  <Button size="sm" className="w-full justify-start">
+                    Register
+                  </Button>
+                </a>
+              </div>
             </nav>
           </div>
         )}
