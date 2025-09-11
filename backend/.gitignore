@@ -1,36 +1,6 @@
-# Environment variables
-./env
+# Ignore environment variable files
+.env
 .env.local
 .env.development
 .env.production
 .env.test
-
-# Go specific
-/bin/
-./go.sum
-./go.mod~
-
-# IDE and editor files
-.vscode/
-.idea/
-*.swp
-*.swo
-*~
-
-# OS generated files
-.DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
-Thumbs.db
-
-# Build artifacts and dependencies
-/vendor/
-/node_modules/  # if you have frontend dependencies
-/dist/
-/build/
-
-# Logs
-*.log
