@@ -11,7 +11,7 @@ const Header = () => {
   };
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-b border-border/50 shadow-card">
+    <header className="fixed top-0 left-0 right-0 z-50 bg-white/50 backdrop-blur-md border-b border-border/50 shadow-card">
       <div className="container mx-auto px-6">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
@@ -28,7 +28,7 @@ const Header = () => {
           {/* Navigation - Desktop (Biarkan <a> karena ini anchor link) */}
           <nav className="hidden md:flex items-center space-x-8">
             {/* Tombol Dashboard diubah di sini */}
-            <a href="/" className="text-foreground hover:text-primary transition-smooth">
+            <a href="/dashboard" className="text-foreground hover:text-primary transition-smooth">
               Dashboard
             </a>
             <a href="#regional" className="text-foreground hover:text-primary transition-smooth">

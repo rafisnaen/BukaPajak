@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Shield, Users, TrendingUp, Globe } from "lucide-react";
-import heroImage from "@/assets/hero-bg.jpg";
+import heroImage from "@/assets/hero-bg.svg";
 
 const HeroSection = () => {
   return (
@@ -53,7 +53,7 @@ const HeroSection = () => {
               <div className="flex items-center justify-center w-12 h-12 rounded-full bg-accent/20 mx-auto mb-4">
                 <Users className="w-6 h-6 text-accent" />
               </div>
-              <h3 className="text-2xl font-bold text-white mb-2">34 Provinsi</h3>
+              <h3 className="text-2xl font-bold text-white mb-2">38 Provinsi</h3>
               <p className="text-white/80">Terhubung dalam sistem</p>
             </Card>
 

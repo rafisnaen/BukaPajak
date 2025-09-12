@@ -26,7 +26,7 @@ const TransparencyMetrics = () => {
     {
       title: "Partisipasi Publik",
       value: 12.8,
-      unit: "K",
+      unit: "rb",
       icon: Users,
       color: "text-secondary",
       bgColor: "bg-secondary/10",

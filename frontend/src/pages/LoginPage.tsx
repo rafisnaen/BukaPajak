@@ -1,7 +1,7 @@
 import Header from "@/components/Header";
 import HeroSection from "@/components/HeroSection";
 import { LoginForm } from "@/components/LoginForm";
-import heroBackground from "@/assets/hero-bg.jpg";
+import heroBackground from "@/assets/hero-bg.svg";
 
 const Index = () => {
   return (
