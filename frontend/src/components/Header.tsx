@@ -28,7 +28,7 @@ const Header = () => {
           {/* Navigation - Desktop (Biarkan <a> karena ini anchor link) */}
           <nav className="hidden md:flex items-center space-x-8">
             {/* Tombol Dashboard diubah di sini */}
-            <a href="/" className="text-foreground hover:text-primary transition-smooth">
+            <a href="/dashboard" className="text-foreground hover:text-primary transition-smooth">
               Dashboard
             </a>
             <a href="#regional" className="text-foreground hover:text-primary transition-smooth">

@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Shield, Users, TrendingUp, Globe } from "lucide-react";
-import heroImage from "@/assets/hero-bg.jpg";
+import heroImage from "@/assets/hero-bg.svg";
 
 const HeroSection = () => {
   return (
