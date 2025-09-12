@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Separator } from "@/components/ui/separator";
 import { Shield, Wallet, Eye, EyeOff } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { login } from "@/api/auth";
 
 export const LoginForm = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -17,15 +18,27 @@ export const LoginForm = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    
-    // Simulate authentication
-    setTimeout(() => {
-      setIsLoading(false);
+
+    try {
+      await login({ email, password });
+
       toast({
         title: "Login Berhasil",
         description: "Selamat datang di platform transparansi Web3",
       });
-    }, 1500);
+
+      // redirect ke dashboard (opsional)
+      // window.location.href = "/dashboard";
+
+    } catch (err: any) {
+      toast({
+        title: "Login gagal",
+        description: err.response?.data?.message || "Terjadi kesalahan, coba lagi",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleWalletConnect = () => {
@@ -111,7 +124,7 @@ export const LoginForm = () => {
               variant="default" 
               size="lg" 
               disabled={isLoading}
-              className="mt-6"
+              className="mt-6 w-full"
             >
               {isLoading ? "Memproses..." : "Masuk"}
             </Button>
@@ -138,7 +151,7 @@ export const LoginForm = () => {
 
           <div className="text-center text-sm text-muted-foreground">
             <span>Belum memiliki akun? </span>
-            <a href="#" className="text-primary hover:underline font-medium">
+            <a href="/register" className="text-primary hover:underline font-medium">
               Daftar sekarang
             </a>
           </div>
