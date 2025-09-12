@@ -40,8 +40,17 @@ func ProgressRoutes(r *gin.Engine) {
 func CommentRoutes(r *gin.Engine) {
 	comment := r.Group("/comments")
 	{
-		comment.POST("", handlers.CreateCommentHandler)
-		comment.GET("", handlers.GetAllCommentsHandler)
+		comment.POST("/progress", handlers.CreateCommentHandler)
+		comment.GET("/progress", handlers.GetAllCommentsHandler)
 		comment.GET("/progress/:progress_id", handlers.GetCommentsByProgressIDHandler)
+	}
+}
+
+func CommentRoutes_Proyek(r *gin.Engine) {
+	comment := r.Group("/comments")
+	{
+		comment.POST("/proyek", handlers.CreateCommentHandler_Proyek)
+		comment.GET("/proyek", handlers.GetAllCommentsHandler_Proyek)
+		comment.GET("/proyek/:proyek_id", handlers.GetCommentsByProyekIDHandler_Proyek) // Changed handler name
 	}
 }

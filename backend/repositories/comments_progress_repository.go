@@ -7,8 +7,6 @@ import (
 )
 
 func CreateComment(comment models.Comment) error {
-	// Buat map hanya dengan field yang ingin di-insert
-	// Jangan sertakan created_at dan updated_at, biarkan database yang set otomatis
 	data := map[string]interface{}{
 		"progress_id": comment.ProgressID,
 		"judul":       comment.Judul,
