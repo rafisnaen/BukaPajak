@@ -24,3 +24,16 @@ func ProjectRoutes(r *gin.Engine) {
 		api.GET("/:id", projectHandler.GetProjectByID)
 	}
 }
+
+func ProgressRoutes(r *gin.Engine) {
+	repo := repositories.NewProgressRepository()
+	progressHandler := handlers.NewProgressHandler(repo)
+
+	api := r.Group("/admin/progress") // ← Change to /admin/progress
+	api.Use(middlewares.AuthMiddleware())
+	{
+		api.POST("", progressHandler.CreateProgress)                   // POST /admin/progress
+		api.GET("", progressHandler.GetAllProgress)                    // GET /admin/progress
+		api.GET("/:proyek_id", progressHandler.GetProgressByProjectID) // GET /admin/progress/:proyek_id
+	}
+}
