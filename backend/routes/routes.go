@@ -37,3 +37,11 @@ func ProgressRoutes(r *gin.Engine) {
 		api.GET("/:proyek_id", progressHandler.GetProgressByProjectID) // GET /admin/progress/:proyek_id
 	}
 }
+func CommentRoutes(r *gin.Engine) {
+	comment := r.Group("/comments")
+	{
+		comment.POST("", handlers.CreateCommentHandler)
+		comment.GET("", handlers.GetAllCommentsHandler)
+		comment.GET("/progress/:progress_id", handlers.GetCommentsByProgressIDHandler)
+	}
+}
