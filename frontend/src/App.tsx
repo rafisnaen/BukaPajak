@@ -8,6 +8,7 @@ import NotFound from "./pages/NotFound";
 import LoginPage from "./pages/LoginPage"; // 1. Impor komponen LoginPage
 import RegisterPage from "./pages/RegisterPage"; // 2. Impor komponen RegisterPage
 import DashboardPage from "./pages/DashboardPage";
+import Footer from "./components/Footer";
 
 const queryClient = new QueryClient();
 

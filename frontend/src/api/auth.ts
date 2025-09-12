@@ -28,3 +28,9 @@ export const register = async (register: Register) => {
     throw err;
   }
 };
+
+export const logout = () => {
+  localStorage.removeItem("token");
+  localStorage.removeItem("user");
+  window.location.href = "/login";
+};
