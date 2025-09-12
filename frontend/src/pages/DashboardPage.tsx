@@ -5,6 +5,7 @@ import { ProjectDetails } from "@/components/dashboard/ProjectDetails";
 import { AuditLog } from "@/components/dashboard/AuditLog";
 import { PublicFeedback } from "@/components/dashboard/PublicFeedback";
 import HeaderLoggedIn from "@/components/HeaderLoggedIn";
+import Footer from "@/components/Footer";
 
 const Index = () => {
   return (
@@ -23,6 +24,7 @@ const Index = () => {
         <ProjectDetails />
         
         <PublicFeedback />
+        <Footer />
       </div>
     </div>
   );

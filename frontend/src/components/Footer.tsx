@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 
 const Footer = () => {
   return (
-    <footer className="bg-primary text-primary-foreground">
+    <footer id="about" className="bg-primary text-primary-foreground rounded-t-3xl rounded-b-3xl m-6">
       <div className="container mx-auto px-6 py-16">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Brand */}
@@ -41,10 +41,9 @@ const Footer = () => {
           <div>
             <h4 className="text-lg font-semibold mb-4">Quick Links</h4>
             <ul className="space-y-3">
-              <li><a href="#dashboard" className="text-primary-foreground/80 hover:text-accent transition-smooth">Dashboard</a></li>
+              <li><a href="/dashboard" className="text-primary-foreground/80 hover:text-accent transition-smooth">Dashboard</a></li>
               <li><a href="#regional" className="text-primary-foreground/80 hover:text-accent transition-smooth">Regional</a></li>
               <li><a href="#transparency" className="text-primary-foreground/80 hover:text-accent transition-smooth">Transparansi</a></li>
-              <li><a href="#about" className="text-primary-foreground/80 hover:text-accent transition-smooth">Tentang Kami</a></li>
             </ul>
           </div>
 
