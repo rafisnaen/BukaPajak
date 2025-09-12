@@ -29,6 +29,8 @@ func main() {
 	routes.AuthRoutes(r)
 	routes.ProjectRoutes(r)
 	routes.ProgressRoutes(r)
+	routes.CommentRoutes(r)
+	routes.CommentRoutes_Proyek(r)
 
 	fmt.Println("Server running on port 8080 🚀")
 	r.Run(":8080")
