@@ -121,7 +121,7 @@ const formatLargeCurrency = (amount: number) => {
           <Card className="bg-gradient-card shadow-card">
             <CardContent className="p-6 text-center">
               <Shield className="w-8 h-8 text-secondary mx-auto mb-3" />
-              <h3 className="text-2xl font-bold text-foreground mb-1">34</h3>
+              <h3 className="text-2xl font-bold text-foreground mb-1">38</h3>
               <p className="text-muted-foreground">Provinsi Aktif</p>
             </CardContent>
           </Card>
