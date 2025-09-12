@@ -77,7 +77,7 @@ export const LoginForm = () => {
               <Input
                 id="email"
                 type="email"
-                placeholder="masukkan@email.anda"
+                placeholder="Masukkan email anda"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="h-11 bg-input border-border focus:border-primary transition-colors"
@@ -110,10 +110,6 @@ export const LoginForm = () => {
             </div>
 
             <div className="flex items-center justify-between text-sm">
-              <label className="flex items-center space-x-2 text-muted-foreground">
-                <input type="checkbox" className="rounded border-border" />
-                <span>Ingat saya</span>
-              </label>
               <a href="#" className="text-primary hover:underline">
                 Lupa kata sandi?
               </a>

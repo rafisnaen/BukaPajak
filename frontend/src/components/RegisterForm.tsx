@@ -2,7 +2,8 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Shield } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { register } from "@/api/auth";
 
@@ -25,7 +26,6 @@ export const RegisterForm = () => {
         description: "Silakan login dengan akun baru Anda.",
       });
 
-      // redirect otomatis ke login
       window.location.href = "/login";
     } catch (err: any) {
       toast({
@@ -40,45 +40,87 @@ export const RegisterForm = () => {
 
   return (
     <div className="w-full max-w-md mx-auto">
-      <Card>
-        <CardHeader>
-          <CardTitle>Daftar Akun</CardTitle>
+      <Card className="shadow-strong border-0 bg-card/95 backdrop-blur-sm">
+        <CardHeader className="space-y-2 text-center">
+          <div className="flex items-center justify-center mb-4">
+            <div className="flex items-center space-x-2">
+              <div className="relative">
+                <Shield className="h-8 w-8 text-primary" />
+              </div>
+              <span className="font-bold text-xl text-primary">BukaPajak</span>
+            </div>
+          </div>
+          <CardTitle className="text-2xl font-bold text-foreground">
+            Daftar Akun
+          </CardTitle>
+          <CardDescription className="text-muted-foreground">
+            Buatk Akun untuk akses sistem transparansi distribusi dana Web3
+          </CardDescription>
         </CardHeader>
-        <CardContent>
+
+        <CardContent className="space-y-6">
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <Label htmlFor="name">Nama</Label>
+            <div className="space-y-2">
+              <Label htmlFor="name" className="text-sm font-medium text-foreground">
+                Nama
+              </Label>
               <Input
                 id="name"
                 value={name}
+                placeholder="Masukkan nama lengkap"
                 onChange={(e) => setName(e.target.value)}
                 required
+                className="h-11 bg-input border-border focus:border-primary transition-colors"
               />
             </div>
-            <div>
-              <Label htmlFor="email">Email</Label>
+
+            <div className="space-y-2">
+              <Label htmlFor="email" className="text-sm font-medium text-foreground">
+                Email
+              </Label>
               <Input
                 id="email"
                 type="email"
+                placeholder="Masukkan email anda"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
+                className="h-11 bg-input border-border focus:border-primary transition-colors"
               />
             </div>
-            <div>
-              <Label htmlFor="password">Kata Sandi</Label>
+
+            <div className="space-y-2">
+              <Label htmlFor="password" className="text-sm font-medium text-foreground">
+                Kata Sandi
+              </Label>
               <Input
                 id="password"
                 type="password"
+                placeholder="Masukkan kata sandi"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
+                className="h-11 bg-input border-border focus:border-primary transition-colors"
               />
             </div>
-            <Button type="submit" disabled={isLoading} className="w-full">
+
+            <Button 
+              type="submit" 
+              variant="default" 
+              size="lg" 
+              disabled={isLoading}
+              className="mt-6 w-full"
+            >
               {isLoading ? "Memproses..." : "Daftar"}
             </Button>
           </form>
+
+          <div className="text-center text-sm text-muted-foreground">
+            <span>Sudah punya akun? </span>
+            <a href="/login" className="text-primary hover:underline font-medium">
+              Masuk sekarang
+            </a>
+          </div>
         </CardContent>
       </Card>
     </div>
