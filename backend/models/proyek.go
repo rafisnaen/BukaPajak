@@ -6,5 +6,6 @@ type Proyek struct {
 	Judul          string `json:"judul"`
 	Deskripsi      string `json:"deskripsi"`
 	ProjectManager string `json:"project_manager"`
+	Budget         string `json:"budget"`
 	Gambar         string `json:"gambar"`
 }

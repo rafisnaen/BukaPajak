@@ -1,3 +1,4 @@
+// repositories/project_repository.go
 package repositories
 
 import (
@@ -21,8 +22,9 @@ func (r *ProjectRepository) CreateProject(project models.Proyek) error {
 			{
 				"judul":           project.Judul,
 				"deskripsi":       project.Deskripsi,
+				"budget":          project.Budget, // ✅ budget ikut disimpan
 				"project_manager": project.ProjectManager,
-				"gambar":          project.Gambar,
+				"gambar_url":      project.Gambar, // ✅ pakai nama kolom yang benar
 			},
 		}, false, "", "representation", "").Execute()
 
@@ -50,7 +52,7 @@ func (r *ProjectRepository) GetProjectByID(id int) (*models.Proyek, error) {
 	var projects []models.Proyek
 	_, err := configs.Supabase.From("proyek").
 		Select("*", "", false).
-		Eq("id", strconv.Itoa(id)). // convert int -> string
+		Eq("id", strconv.Itoa(id)).
 		ExecuteTo(&projects)
 
 	if err != nil {

@@ -26,11 +26,13 @@ func NewProjectHandler(repo *repositories.ProjectRepository) *ProjectHandler {
 func (h *ProjectHandler) CreateProject(c *gin.Context) {
 	var req schemas.ProjectRequest
 
+	// Bind form-data (judul, deskripsi, project_manager, budget)
 	if err := c.ShouldBind(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
+	// Get file from form-data with key = "gambar"
 	file, err := c.FormFile("gambar")
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Gambar is required"})
@@ -39,7 +41,8 @@ func (h *ProjectHandler) CreateProject(c *gin.Context) {
 
 	// Simpan file di folder uploads
 	filename := fmt.Sprintf("%d_%s", time.Now().Unix(), filepath.Base(file.Filename))
-	filePath := "uploads/" + filename
+	filePath := filepath.Join("uploads", filename)
+
 	if err := c.SaveUploadedFile(file, filePath); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save image"})
 		return
@@ -49,6 +52,7 @@ func (h *ProjectHandler) CreateProject(c *gin.Context) {
 		Judul:          req.Judul,
 		Deskripsi:      req.Deskripsi,
 		ProjectManager: req.ProjectManager,
+		Budget:         req.Budget,
 		Gambar:         filePath,
 	}
 
