@@ -3,9 +3,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Shield } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { register } from "@/api/auth";
+import Logo from "@/assets/Group 2.svg";
 
 export const RegisterForm = () => {
   const [name, setName] = useState("");
@@ -43,10 +43,8 @@ export const RegisterForm = () => {
       <Card className="shadow-strong border-0 bg-card/95 backdrop-blur-sm">
         <CardHeader className="space-y-2 text-center">
           <div className="flex items-center justify-center mb-4">
-            <div className="flex items-center space-x-2">
-              <div className="relative">
-                <Shield className="h-8 w-8 text-primary" />
-              </div>
+           <div className="flex items-center justify-start">
+              <img src={Logo} alt="BukaPajak Logo" className="h-8" />
               <span className="font-bold text-xl text-primary">BukaPajak</span>
             </div>
           </div>
