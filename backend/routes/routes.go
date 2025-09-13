@@ -12,6 +12,7 @@ func AuthRoutes(r *gin.Engine) {
 	r.POST("/register", handlers.Register)
 	r.POST("/login", handlers.Login)
 }
+
 func ProjectRoutes(r *gin.Engine) {
 	repo := repositories.NewProjectRepository()
 	projectHandler := handlers.NewProjectHandler(repo)
@@ -52,5 +53,12 @@ func CommentRoutes_Proyek(r *gin.Engine) {
 		comment.POST("/proyek", handlers.CreateCommentHandler_Proyek)
 		comment.GET("/proyek", handlers.GetAllCommentsHandler_Proyek)
 		comment.GET("/proyek/:proyek_id", handlers.GetCommentsByProyekIDHandler_Proyek) // Changed handler name
+	}
+}
+
+func Feedback(r *gin.Engine) {
+	Feedback := r.Group("/feedback")
+	{
+		Feedback.POST("", handlers.CreateFeedback)
 	}
 }
