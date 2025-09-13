@@ -1,4 +1,3 @@
-// handlers/comment_handler.go
 package handlers
 
 import (
@@ -19,10 +18,13 @@ func CreateCommentHandler(c *gin.Context) {
 	}
 
 	comment := models.Comment{
-		ProgressID: req.ProgressID,
-		Judul:      req.Judul,
-		Isi:        req.Isi,
-		Nama:       req.Nama,
+		ProgressID:                  req.ProgressID,
+		Judul:                       req.Judul,
+		Isi:                         req.Isi,
+		Nama:                        req.Nama,
+		TransparansiProgress:        req.TransparansiProgress,
+		KualitasPelaksanaanProgress: req.KualitasPelaksanaanProgress,
+		EffisiensiAnggaranProgress:  req.EffisiensiAnggaranProgress,
 	}
 
 	if err := repositories.CreateComment(comment); err != nil {
