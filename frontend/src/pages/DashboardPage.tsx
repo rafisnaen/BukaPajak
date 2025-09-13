@@ -4,14 +4,13 @@ import { RegionalDistribution } from "@/components/dashboard/RegionalDistributio
 import { ProjectDetails } from "@/components/dashboard/ProjectDetails";
 import { AuditLog } from "@/components/dashboard/AuditLog";
 import { PublicFeedback } from "@/components/dashboard/PublicFeedback";
-import HeaderLoggedIn from "@/components/HeaderLoggedIn";
+import Header  from "@/components/Header";
 import Footer from "@/components/Footer";
 
 const Index = () => {
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      <HeaderLoggedIn />
-
+      <Header />
       {/* Konten Utama */}
       <main className="container mx-auto px-4 pt-24 pb-8 space-y-8 flex-grow">
         <DashboardHeader />
