@@ -18,10 +18,16 @@ func CreateCommentHandler_Proyek(c *gin.Context) {
 	}
 
 	comment := models.Comment_Proyek{
-		ProyekID: req.ProyekID,
-		Judul:    req.Judul,
-		Isi:      req.Isi,
-		Nama:     req.Nama,
+		ProyekID:                     req.ProyekID,
+		Judul:                        req.Judul,
+		Isi:                          req.Isi,
+		Nama:                         req.Nama,
+		TransparansiProyek:           req.TransparansiProyek,
+		KualitasPelaksanaanProyek:    req.KualitasPelaksanaanProyek,
+		ManfaatUntukMasyarakatProyek: req.ManfaatUntukMasyarakatProyek,
+		InovasiProyek:                req.InovasiProyek,
+		EfisiensiAnggaranProyek:      req.EfisiensiAnggaranProyek,
+		Rating:                       req.Rating,
 	}
 
 	if err := repositories.CreateComment_Proyek(comment); err != nil {
@@ -32,7 +38,7 @@ func CreateCommentHandler_Proyek(c *gin.Context) {
 }
 
 func GetAllCommentsHandler_Proyek(c *gin.Context) {
-	comments, err := repositories.GetAllComments_Proyek() // Changed to _Proyek
+	comments, err := repositories.GetAllComments_Proyek()
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -40,14 +46,14 @@ func GetAllCommentsHandler_Proyek(c *gin.Context) {
 	c.JSON(http.StatusOK, comments)
 }
 
-func GetCommentsByProyekIDHandler_Proyek(c *gin.Context) { // Changed function name
-	proyekID, err := strconv.Atoi(c.Param("proyek_id")) // Changed parameter name
+func GetCommentsByProyekIDHandler_Proyek(c *gin.Context) {
+	proyekID, err := strconv.Atoi(c.Param("proyek_id"))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid proyek ID"})
 		return
 	}
 
-	comments, err := repositories.GetCommentsByProyekID_Proyek(proyekID) // Changed repository function
+	comments, err := repositories.GetCommentsByProyekID_Proyek(proyekID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
