@@ -20,3 +20,13 @@ func CreateFeedback(feedback models.Feedback) error {
 
 	return err
 }
+
+func GetAllFeedbacks() ([]models.Feedback, error) {
+	var feedback []models.Feedback
+	_, err := configs.Supabase.
+		From("feedback").
+		Select("*", "", false).
+		ExecuteTo(&feedback)
+
+	return feedback, err
+}

@@ -60,5 +60,6 @@ func Feedback(r *gin.Engine) {
 	Feedback := r.Group("/feedback")
 	{
 		Feedback.POST("", handlers.CreateFeedback)
+		Feedback.GET("", handlers.GetAllFeedbacks)
 	}
 }
