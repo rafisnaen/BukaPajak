@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
-import { Building2, Menu } from "lucide-react";
+import { Menu } from "lucide-react";
 import { useState } from "react";
+import Logo from "@/assets/Group 7.svg";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -18,9 +19,7 @@ const Header = () => {
           {/* Kiri: Logo (mengisi ruang kosong) */}
           <div className="flex-1 flex justify-start">
             <a href="/" className="flex items-center space-x-3" onClick={handleLinkClick}>
-              <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-primary">
-                <Building2 className="w-6 h-6 text-white" />
-              </div>
+              <img src={Logo} alt="BukaPajak Logo" className="w-10 h-10" />
               <div>
                 <h1 className="text-lg font-bold text-foreground">BukaPajak</h1>
                 <p className="text-xs text-muted-foreground">Transparency Platform</p>

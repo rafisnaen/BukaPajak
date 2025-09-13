@@ -1,5 +1,7 @@
 import { Building2, Github, Twitter, Linkedin, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import Logo from "@/assets/Group 7.svg";
+
 
 const Footer = () => {
   return (
@@ -10,7 +12,11 @@ const Footer = () => {
           <div className="col-span-1 md:col-span-2">
             <div className="flex items-center space-x-3 mb-6">
               <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-white/10">
-                <Building2 className="w-7 h-7 text-accent" />
+                <img 
+                  src={Logo} 
+                  alt="BukaPajak Logo" 
+                  className="w-9 h-9 object-contain ml-1" 
+                />
               </div>
               <div>
                 <h3 className="text-2xl font-bold">BukaPajak</h3>

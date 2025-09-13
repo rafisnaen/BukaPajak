@@ -9,23 +9,23 @@ import Footer from "@/components/Footer";
 
 const Index = () => {
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background flex flex-col">
       <HeaderLoggedIn />
-      <div className="container mx-auto px-4 pt-24 pb-8 space-y-8">
+
+      {/* Konten Utama */}
+      <main className="container mx-auto px-4 pt-24 pb-8 space-y-8 flex-grow">
         <DashboardHeader />
-        
         <BudgetOverview />
-        
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <RegionalDistribution />
           <AuditLog />
         </div>
-        
         <ProjectDetails />
-        
         <PublicFeedback />
-        <Footer />
-      </div>
+      </main>
+
+      {/* Footer selalu full width */}
+      <Footer />
     </div>
   );
 };
