@@ -12,13 +12,21 @@ export async function createFeedback(data: Feedback): Promise<FeedbackResponse> 
   }
 }
 
-// Ambil semua feedback (opsional, kalau backend ada GET)
+// Ambil semua feedback
 export async function getFeedbacks(): Promise<Feedback[]> {
   try {
-    const res = await api.get<Feedback[]>("/feedback");
-    return res.data;
+    const res = await api.get("/feedback"); // Hapus <Feedback[]> sementara untuk inspeksi
+    
+    // PERBAIKAN: Periksa apakah res.data adalah sebuah array
+    // Jika ya, kembalikan data tersebut. Jika tidak, kembalikan array kosong.
+    if (Array.isArray(res.data)) {
+      return res.data as Feedback[];
+    } else {
+      console.warn("API /feedback tidak mengembalikan sebuah array:", res.data);
+      return [];
+    }
   } catch (error: any) {
     console.error("Gagal fetch feedback:", error);
-    return [];
+    return []; // Jika API error, kembalikan array kosong
   }
 }
