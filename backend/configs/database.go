@@ -1,6 +1,7 @@
 package configs
 
 import (
+	"fmt"
 	"log"
 	"os"
 
@@ -10,19 +11,26 @@ import (
 
 var Supabase *supa.Client
 
-func ConnectSupaBase() {
+func ConnectSupaBase() error {
 	err := godotenv.Load()
 	if err != nil {
-		log.Fatal("Error loading .env file")
+		log.Printf("Warning: Error loading .env file: %v", err)
+		// Don't fatal here, just continue - environment variables might be set elsewhere
 	}
 
 	url := os.Getenv("SUPABASEURL")
 	key := os.Getenv("SUPABASEKEY")
 
+	if url == "" || key == "" {
+		return fmt.Errorf("SUPABASEURL or SUPABASEKEY environment variables not set")
+	}
+
 	client, err := supa.NewClient(url, key, nil)
 	if err != nil {
-		log.Fatal("failed to connect supabase: ", err)
+		return fmt.Errorf("failed to connect to Supabase: %v", err)
 	}
 
 	Supabase = client
+	log.Printf("✅ Connected to Supabase successfully")
+	return nil
 }
