@@ -9,6 +9,7 @@ import LoginPage from "./pages/LoginPage"; // 1. Impor komponen LoginPage
 import RegisterPage from "./pages/RegisterPage"; // 2. Impor komponen RegisterPage
 import DashboardPage from "./pages/DashboardPage";
 import Footer from "./components/Footer";
+import Regional from "./pages/Regional";
 
 const queryClient = new QueryClient();
 
@@ -23,6 +24,7 @@ const App = () => (
           <Route path="/login" element={<LoginPage />} /> {/* 2. Tambahkan rute untuk halaman login */}
           <Route path="/register" element={<RegisterPage />} /> {/* 3. Tambahkan rute untuk halaman register */}
           <Route path="/dashboard" element={<DashboardPage />} /> {/* 4. Tambahkan rute untuk halaman dashboard */} 
+          <Route path="/regional" element={<Regional />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

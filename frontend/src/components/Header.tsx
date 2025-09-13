@@ -32,7 +32,7 @@ const Header = () => {
             <a href="/dashboard" className="text-foreground hover:text-primary transition-smooth">
               Dashboard
             </a>
-            <a href="#regional" className="text-foreground hover:text-primary transition-smooth">
+            <a href="/regional" className="text-foreground hover:text-primary transition-smooth">
               Regional
             </a>
             <a href="#transparency" className="text-foreground hover:text-primary transition-smooth">
@@ -77,7 +77,7 @@ const Header = () => {
               <a href="/dashboard" onClick={handleLinkClick} className="text-foreground hover:text-primary transition-smooth">
                 Dashboard
               </a>
-              <a href="#regional" onClick={handleLinkClick} className="text-foreground hover:text-primary transition-smooth">
+              <a href="/regional" onClick={handleLinkClick} className="text-foreground hover:text-primary transition-smooth">
                 Regional
               </a>
               <a href="#transparency" onClick={handleLinkClick} className="text-foreground hover:text-primary transition-smooth">

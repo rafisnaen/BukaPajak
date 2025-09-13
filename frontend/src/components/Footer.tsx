@@ -48,7 +48,7 @@ const Footer = () => {
             <h4 className="text-lg font-semibold mb-4">Quick Links</h4>
             <ul className="space-y-3">
               <li><a href="/dashboard" className="text-primary-foreground/80 hover:text-accent transition-smooth">Dashboard</a></li>
-              <li><a href="#regional" className="text-primary-foreground/80 hover:text-accent transition-smooth">Regional</a></li>
+              <li><a href="/regional" className="text-primary-foreground/80 hover:text-accent transition-smooth">Regional</a></li>
               <li><a href="#transparency" className="text-primary-foreground/80 hover:text-accent transition-smooth">Transparansi</a></li>
             </ul>
           </div>
@@ -71,7 +71,8 @@ const Footer = () => {
             © 2025  BukaPajak. Semua hak dilindungi undang-undang.
           </p>
           <p className="text-primary-foreground/60 text-sm mt-4 md:mt-0">
-            Powered by Blockchain Technology
+            Powered by 
+            <span className="text-accent"> Bukapajak Blockchain Technology</span>
           </p>
         </div>
       </div>
