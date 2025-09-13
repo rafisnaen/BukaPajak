@@ -1,25 +1,34 @@
-require("dotenv").config();
-require("@nomiclabs/hardhat-ethers");
-require("@nomiclabs/hardhat-etherscan");
 require("@nomicfoundation/hardhat-toolbox");
+require("dotenv").config();
 
+/** @type import('hardhat/config').HardhatUserConfig */
 module.exports = {
   defaultNetwork: "hardhat",
+  solidity: {
+    version: "0.8.19",  // Match kedua pragma
+    settings: {
+      optimizer: {
+        enabled: true,
+        runs: 200
+      }
+    }
+  },
   networks: {
-    hardhat: {},
+    hardhat: {
+      chainId: 31337
+    },
     localhost: {
       url: "http://127.0.0.1:8545"
     },
     sepolia: {
-      url: process.env.SEPOLIA_URL || "",
+      url: process.env.SEPOLIA_URL || "https://rpc.sepolia.org",
       accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : []
     }
   },
-  solidity: {
-    version: "0.8.19",
-    settings: { optimizer: { enabled: true, runs: 200 } }
-  },
   etherscan: {
     apiKey: process.env.ETHERSCAN_API_KEY || ""
+  },
+  mocha: {
+    timeout: 40000
   }
 };
