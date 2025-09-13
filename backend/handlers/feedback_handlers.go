@@ -42,3 +42,11 @@ func CreateFeedback(c *gin.Context) {
 
 	c.JSON(http.StatusCreated, gin.H{"message": "Feedback created and email sent successfully"})
 }
+func GetAllFeedbacks(c *gin.Context) {
+	comments, err := repositories.GetAllFeedbacks()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, comments)
+}
