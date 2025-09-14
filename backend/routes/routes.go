@@ -26,6 +26,19 @@ func ProjectRoutes(r *gin.Engine) {
 		api.GET("/:id", projectHandler.GetProjectByID)
 	}
 }
+func RegionRoutes(r *gin.Engine) {
+
+	api := r.Group("/admin/region")
+	api.Use(middlewares.AuthMiddleware())
+	{
+		api.POST("", handlers.CreateRegionHandler)
+	}
+	publicApi := r.Group("/admin/region")
+	{
+		publicApi.GET("", handlers.GetAllRegions)
+	}
+
+}
 
 func ProgressRoutes(r *gin.Engine) {
 	repo := repositories.NewProgressRepository()

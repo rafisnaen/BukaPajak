@@ -49,7 +49,7 @@ func main() {
 	routes.Feedback(r)
 	routes.SmartContract(r)
 	routes.WalletRoutes(r)
-
+	routes.RegionRoutes(r)
 	// Health check endpoint
 	r.GET("/", func(c *gin.Context) {
 		c.JSON(200, gin.H{
