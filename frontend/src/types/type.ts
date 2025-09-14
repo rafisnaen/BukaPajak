@@ -1,9 +1,10 @@
 
-export interface Register{
-    name : string;
-    email : string;
-    password : string;
+export interface Register {
+  email: string;
+  password: string;
+  secret_key: string; // ✅ tambah
 }
+
 
 export interface Login{
     email : string;

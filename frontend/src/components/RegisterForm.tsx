@@ -8,35 +8,36 @@ import { register } from "@/api/auth";
 import Logo from "@/assets/Group 2.svg";
 
 export const RegisterForm = () => {
-  const [name, setName] = useState("");
+const [secretKey, setSecretKey] = useState(""); 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
+  e.preventDefault();
+  setIsLoading(true);
 
-    try {
-      await register({ name, email, password });
+  try {
+    await register({ email, password, secret_key: secretKey });
 
-      toast({
-        title: "Registrasi Berhasil",
-        description: "Silakan login dengan akun baru Anda.",
-      });
+    toast({
+      title: "Registrasi Berhasil",
+      description: "Silakan login dengan akun baru Anda.",
+    });
 
-      window.location.href = "/login";
-    } catch (err: any) {
-      toast({
-        title: "Registrasi Gagal",
-        description: err.response?.data?.message || "Terjadi kesalahan, coba lagi",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    window.location.href = "/login";
+  } catch (err: any) {
+    toast({
+      title: "Registrasi Gagal",
+      description: err.response?.data?.error || "Terjadi kesalahan, coba lagi",
+      variant: "destructive",
+    });
+  } finally {
+    setIsLoading(false);
+  }
+};
+
 
   return (
     <div className="w-full max-w-md mx-auto">
@@ -60,13 +61,13 @@ export const RegisterForm = () => {
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="name" className="text-sm font-medium text-foreground">
-                Nama
+                Wallet Address
               </Label>
               <Input
                 id="name"
-                value={name}
-                placeholder="Masukkan nama lengkap"
-                onChange={(e) => setName(e.target.value)}
+                value={secretKey}
+                placeholder="Masukkan wallet address"
+                onChange={(e) => setSecretKey(e.target.value)}
                 required
                 className="h-11 bg-input border-border focus:border-primary transition-colors"
               />
