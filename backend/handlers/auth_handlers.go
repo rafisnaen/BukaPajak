@@ -31,7 +31,6 @@ func Register(c *gin.Context) {
 	user := models.UserPemerintah{
 		Email:    req.Email,
 		Password: string(hash),
-		Name:     req.Name,
 	}
 
 	if err := repositories.CreateUser(user); err != nil {
