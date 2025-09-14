@@ -1,52 +1,49 @@
-import { FileText, Calendar, CircleDollarSign } from 'lucide-react';
+import { FileText, Clock, CheckCircle, DollarSign, XCircle } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-// Mendefinisikan tipe data untuk sebuah proposal.
-// Ini membantu TypeScript memastikan data kita selalu benar.
-type Proposal = {
+// WAJIB: Tambahkan 'export' di sini agar tipe ini bisa digunakan di file lain (seperti HistoryPage).
+export type ProposalProps = {
     id: string;
     title: string;
-    status: 'Funded' | 'Approved' | 'Pending' | 'Rejected';
+    status: 'Pending' | 'Approved' | 'Rejected' | 'Funded';
     amount: number;
     submissionDate: string;
-};
+    };
 
-// Mendefinisikan tipe untuk props yang diterima komponen ini.
-interface ProposalCardProps {
-    proposal: Proposal;
-}
+    // Objek untuk konfigurasi tampilan status
+    const statusConfig = {
+        Pending: { icon: Clock, color: "bg-yellow-100 text-yellow-800", label: "Menunggu" },
+        Approved: { icon: CheckCircle, color: "bg-green-100 text-green-800", label: "Disetujui" },
+        Rejected: { icon: XCircle, color: "bg-red-100 text-red-800", label: "Ditolak" },
+        Funded: { icon: DollarSign, color: "bg-blue-100 text-blue-800", label: "Didanai" },
+    };
 
-// Map untuk mengubah status menjadi teks dan warna yang mudah dibaca.
-const statusStyles = {
-    Funded: { badge: "bg-green-100 text-green-800", text: "Didanai" },
-    Approved: { badge: "bg-blue-100 text-blue-800", text: "Disetujui" },
-    Pending: { badge: "bg-yellow-100 text-yellow-800", text: "Menunggu" },
-    Rejected: { badge: "bg-red-100 text-red-800", text: "Ditolak" },
-};
-
-// WAJIB: Tambahkan 'export' di sini agar bisa diimpor oleh ProposalHistory.
-export const ProposalCard = ({ proposal }: ProposalCardProps) => {
-    const style = statusStyles[proposal.status];
+    // WAJIB: Pastikan komponen ini juga diekspor.
+    export const ProposalCard = ({ proposal }: { proposal: ProposalProps }) => {
+    const { title, status, amount, submissionDate } = proposal;
+    const currentStatus = statusConfig[status];
 
     return (
-        <div className="bg-white border border-gray-200 rounded-lg p-5 shadow-sm hover:shadow-md transition-shadow duration-300">
-            <div className="flex justify-between items-start mb-3">
-                <FileText className="w-8 h-8 text-blue-500" />
-                <span className={`px-3 py-1 text-xs font-semibold rounded-full ${style.badge}`}>
-                    {style.text}
-                </span>
+        <Card className="hover:shadow-md transition-shadow">
+        <CardHeader>
+            <div className="flex justify-between items-start">
+                <FileText className="w-8 h-8 text-gray-400" />
+                <Badge className={`${currentStatus.color}`}>{currentStatus.label}</Badge>
             </div>
-            <h4 className="text-lg font-bold text-gray-800 mb-4 h-16">{proposal.title}</h4>
-            <div className="border-t pt-4 space-y-2 text-sm text-gray-600">
-                <div className="flex items-center">
-                    <CircleDollarSign className="w-4 h-4 mr-2 text-gray-400" />
-                    <span>{proposal.amount} ETH</span>
-                </div>
-                <div className="flex items-center">
-                    <Calendar className="w-4 h-4 mr-2 text-gray-400" />
-                    <span>Diajukan: {new Date(proposal.submissionDate).toLocaleDateString("id-ID")}</span>
-                </div>
+            <CardTitle className="pt-4 text-lg font-semibold text-gray-800">{title}</CardTitle>
+        </CardHeader>
+        <CardContent className="text-sm text-gray-600 space-y-2">
+            <div className="flex items-center">
+                <DollarSign className="w-4 h-4 mr-2 text-gray-500" />
+                <span>{amount} ETH</span>
             </div>
-        </div>
+            <div className="flex items-center">
+                <Clock className="w-4 h-4 mr-2 text-gray-500" />
+                <span>Diajukan: {submissionDate}</span>
+            </div>
+        </CardContent>
+        </Card>
     );
 };
 
