@@ -1,3 +1,10 @@
+export interface ProjectStage {
+  name: string;
+  date: string;
+  status: 'selesai' | 'sedang dilakukan';
+  imageUrl: string;
+}
+
 export interface Project {
   id: string;
   name: string;
@@ -16,6 +23,7 @@ export interface Project {
   };
   averageRating: number;
   comments: Comment[];
+  stages: ProjectStage[];
 }
 
 export interface Comment {
@@ -88,6 +96,34 @@ const sampleComments: Comment[] = [
   }
 ];
 
+// FUNGSI BARU: Membuat data tahapan proyek
+const createSampleStages = (count: number): ProjectStage[] => {
+  const stageNames = [
+    "Perencanaan & Desain",
+    "Pengadaan Lahan & Izin",
+    "Konstruksi Awal",
+    "Pemasangan Struktur Utama",
+    "Tahap Finishing",
+    "Uji Coba & Peresmian",
+  ];
+
+  // Anda bisa mengganti ini dengan URL gambar yang sebenarnya
+  const imageUrls = [
+    "https://images.unsplash.com/photo-1541888946425-d81bb19240f5?q=80&w=2070&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1511055223733-5a6c214643be?q=80&w=2070&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1429497444061-f86682f3c645?q=80&w=2070&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1581193348381-073c139c1f6d?q=80&w=2070&auto=format&fit=crop",
+  ];
+
+  return Array.from({ length: count }, (_, index) => ({
+    name: stageNames[index % stageNames.length],
+    date: `2023-0${index + 3}-10`, // Contoh tanggal
+    status: Math.random() > 0.5 ? 'selesai' : 'sedang dilakukan' as 'selesai' | 'sedang dilakukan',
+    imageUrl: imageUrls[index % imageUrls.length],
+  }));
+};
+
+
 // Sample projects
 const createSampleProjects = (count: number, baseId: string): Project[] => {
   const projectNames = [
@@ -127,7 +163,9 @@ const createSampleProjects = (count: number, baseId: string): Project[] => {
       budgetEfficiency: Math.floor(Math.random() * 2) + 3
     },
     averageRating: Math.floor(Math.random() * 2) + 3.5,
-    comments: sampleComments
+    comments: sampleComments,
+    // PERBAIKAN: Menambahkan properti 'stages' yang hilang
+    stages: createSampleStages(4) 
   }));
 };
 
