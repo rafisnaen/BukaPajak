@@ -14,9 +14,10 @@ import Regional from "./pages/Regional";
 import Transparansi from "./pages/Transparansi";
 import Tentang from "./pages/Tentang";
 
-// --- Halaman-halaman Baru untuk POV Pengusul ---
+// --- Halaman-halaman untuk POV Pengusul ---
 import ProposerDashboardPage from "./pages/proposer/DashboardPage";
-import NewProposalPage from '@/components/proposer/NewProposalPage';
+import NewProposalPage from "./pages/proposer/NewProposalPage";
+import HistoryPage from "./pages/proposer/HistoryPage"; // 1. Impor halaman riwayat
 
 const queryClient = new QueryClient();
 
@@ -40,6 +41,7 @@ const App = () => (
           {/* --- Rute Khusus Pengusul (setelah login) --- */}
           <Route path="/proposer/dashboard" element={<ProposerDashboardPage />} />
           <Route path="/proposer/new" element={<NewProposalPage />} />
+          <Route path="/proposer/history" element={<HistoryPage />} /> {/* 2. Tambahkan rute untuk halaman riwayat */}
 
           {/* Rute "Catch-all" Not Found harus selalu di paling bawah */}
           <Route path="*" element={<NotFound />} />
@@ -50,3 +52,4 @@ const App = () => (
 );
 
 export default App;
+

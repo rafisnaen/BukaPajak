@@ -1,21 +1,12 @@
-import { ProposerHeader } from "@/components/proposer/ProposerHeader";
+import { ProposerLayout } from "@/components/proposer/ProposerLayout";
 import { NewProposalForm } from "@/components/proposer/NewProposalForm";
-import Footer from "@/components/Footer";
 import { ArrowLeft } from "lucide-react";
 import { Link } from "react-router-dom";
 
-// Ini adalah halaman "wadah" untuk formulir.
+// Versi baru dari halaman formulir, sekarang menggunakan ProposerLayout.
 const NewProposalPage = () => {
-    const currentUser = {
-        name: "Rafi (Dinas PU)",
-        walletAddress: "0x3B92...bc7d14",
-    };
-
     return (
-        <div className="min-h-screen bg-gray-50 flex flex-col">
-        <ProposerHeader walletAddress={currentUser.walletAddress} />
-        
-        <main className="container mx-auto px-4 py-8 flex-grow">
+        <ProposerLayout>
             <div className="max-w-4xl mx-auto">
                 {/* Tombol Kembali ke Dashboard */}
                 <Link
@@ -35,14 +26,12 @@ const NewProposalPage = () => {
                     </p>
                 </div>
                 
-                {/* Komponen Form */}
+                {/* Komponen Form Inti */}
                 <NewProposalForm />
             </div>
-        </main>
-
-        <Footer />
-        </div>
+        </ProposerLayout>
     );
 };
 
 export default NewProposalPage;
+
