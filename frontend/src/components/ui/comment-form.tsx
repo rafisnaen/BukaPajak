@@ -48,7 +48,8 @@ const CommentForm = ({ projectId, onSubmit }: CommentFormProps) => {
     { key: "budgetEfficiency", label: "Efisiensi Anggaran" }
   ];
 
-  const handleSubmit = () => {
+  const handleSubmit = (e: React.MouseEvent) => {
+    e.stopPropagation();
     if (rating === 0 || !content.trim()) return;
     
     const allRatingsSelected = Object.values(ratings).every(rating => rating !== "");
@@ -76,12 +77,24 @@ const CommentForm = ({ projectId, onSubmit }: CommentFormProps) => {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" size="sm" className="w-full">
+        {/* PERBAIKAN: Menambahkan `onClick` untuk menghentikan propagasi event */}
+        <Button 
+          variant="outline" 
+          size="sm" 
+          className="w-full"
+          onClick={(e) => {
+            e.stopPropagation();
+          }}
+        >
           <MessageSquarePlus className="w-4 h-4 mr-2" />
           Tambah Komentar & Rating
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
+      {/* PERBAIKAN: Menambahkan `onClick` juga pada konten dialog untuk keamanan */}
+      <DialogContent 
+        className="max-w-md max-h-[90vh] overflow-y-auto"
+        onClick={(e) => e.stopPropagation()}
+      >
         <DialogHeader>
           <DialogTitle>Berikan Feedback Proyek</DialogTitle>
         </DialogHeader>
