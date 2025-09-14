@@ -48,6 +48,7 @@ func main() {
 	routes.CommentRoutes_Proyek(r)
 	routes.Feedback(r)
 	routes.SmartContract(r)
+	routes.WalletRoutes(r)
 
 	// Health check endpoint
 	r.GET("/", func(c *gin.Context) {
