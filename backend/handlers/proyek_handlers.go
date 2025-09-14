@@ -17,7 +17,6 @@ type ProjectHandler struct {
 	Repo *repositories.ProjectRepository
 }
 
-// Constructor
 func NewProjectHandler(repo *repositories.ProjectRepository) *ProjectHandler {
 	return &ProjectHandler{Repo: repo}
 }
@@ -26,26 +25,21 @@ func NewProjectHandler(repo *repositories.ProjectRepository) *ProjectHandler {
 func (h *ProjectHandler) CreateProject(c *gin.Context) {
 	var req schemas.ProjectRequest
 
-	// Bind form-data (judul, deskripsi, project_manager, budget)
 	if err := c.ShouldBind(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	// Get file from form-data with key = "gambar"
-	file, err := c.FormFile("gambar")
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Gambar is required"})
-		return
-	}
-
-	// Simpan file di folder uploads
-	filename := fmt.Sprintf("%d_%s", time.Now().Unix(), filepath.Base(file.Filename))
-	filePath := filepath.Join("uploads", filename)
-
-	if err := c.SaveUploadedFile(file, filePath); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save image"})
-		return
+	// Upload gambar (opsional)
+	file, _ := c.FormFile("gambar")
+	var filePath string
+	if file != nil {
+		filename := fmt.Sprintf("%d_%s", time.Now().Unix(), filepath.Base(file.Filename))
+		filePath = filepath.Join("uploads", filename)
+		if err := c.SaveUploadedFile(file, filePath); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save image"})
+			return
+		}
 	}
 
 	proyek := models.Proyek{
@@ -53,11 +47,15 @@ func (h *ProjectHandler) CreateProject(c *gin.Context) {
 		Deskripsi:      req.Deskripsi,
 		ProjectManager: req.ProjectManager,
 		Budget:         req.Budget,
-		Gambar:         filePath,
+		GambarURL:      filePath,
+		RegionID:       req.RegionID,
+		Status:         req.Status,
+		Kategori:       req.Kategori,
 	}
 
 	if err := h.Repo.CreateProject(proyek); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create project"})
+		fmt.Println("DEBUG ERROR:", err) // 👉 cek error sebenarnya
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
