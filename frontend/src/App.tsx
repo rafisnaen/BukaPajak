@@ -16,8 +16,6 @@ import Tentang from "./pages/Tentang";
 
 // --- Halaman-halaman untuk POV Pengusul ---
 import ProposerDashboardPage from "./pages/proposer/DashboardPage";
-
-// FIX: Path import diubah ke folder 'pages', bukan 'components'
 import NewProposalPage from "./pages/proposer/NewProposalPage";
 import HistoryPage from "./pages/proposer/HistoryPage";
 
