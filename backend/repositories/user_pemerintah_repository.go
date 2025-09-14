@@ -11,7 +11,6 @@ func CreateUser(user models.UserPemerintah) error {
 	insertData := map[string]interface{}{
 		"email":    user.Email,
 		"password": user.Password,
-		"name":     user.Name, // ✅ FIXED
 	}
 
 	// Use "representation" so Supabase returns inserted row
