@@ -7,7 +7,7 @@ import { Star, ThumbsUp, Calendar, DollarSign, MessageCircle, Image } from "luci
 import { Project } from "@/data/detailed-provinces";
 import { useState } from "react";
 import CommentForm from "./comment-form";
-import { useToast } from "@/hooks/use-toast";
+import { useToast }  from "@/hooks/use-toast";
 import ProjectDetailsDialog from "./ProjectDetailDialog";
 
 interface ProjectCardProps {

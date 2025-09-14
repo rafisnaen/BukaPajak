@@ -35,15 +35,16 @@ const HeroSection = () => {
 
           {/* CTA Buttons */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16">
-            <Button size="lg" className="bg-white text-primary shadow-elevated hover:bg-white/10 backdrop-blur-sm">
-              Lihat Dashboard
+            <Button asChild size="lg" className="bg-white text-primary shadow-elevated hover:bg-white/10 backdrop-blur-sm">
+              <a href="/dashboard">Lihat Dashboard</a>
             </Button>
             <Button 
+              asChild
               size="lg" 
               variant="outline" 
               className="bg-white text-primary shadow-elevated hover:bg-white/10 backdrop-blur-sm"
             >
-              Pelajari Lebih Lanjut
+              <a href="/regional">Pelajari Lebih Lanjut</a>
             </Button>
           </div>
 
