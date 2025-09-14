@@ -7,7 +7,7 @@ const Tentang = () => {
     <div className="min-h-screen bg-background">
       <Header />
       
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 pt-24 pb-8">
         {/* Header */}
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold text-primary mb-4">Tentang BukaPajak</h1>
@@ -35,8 +35,8 @@ const Tentang = () => {
 
           <Card className="text-center shadow-card">
             <CardHeader>
-              <div className="w-16 h-16 bg-gradient-accent rounded-full flex items-center justify-center mx-auto mb-4">
-                <Zap className="w-8 h-8 text-white" />
+              <div className="w-16 h-16 bg-gradient-primary rounded-full flex items-center justify-center mx-auto mb-4">
+                <Zap className="w-8 h-8 text-primary-foreground" />
               </div>
               <CardTitle className="text-lg">Real-time</CardTitle>
             </CardHeader>
@@ -63,8 +63,8 @@ const Tentang = () => {
 
           <Card className="text-center shadow-card">
             <CardHeader>
-              <div className="w-16 h-16 bg-gradient-accent rounded-full flex items-center justify-center mx-auto mb-4">
-                <Globe className="w-8 h-8 text-white" />
+              <div className="w-16 h-16 bg-gradient-primary rounded-full flex items-center justify-center mx-auto mb-4">
+                <Globe className="w-8 h-8 text-primary-foreground" />
               </div>
               <CardTitle className="text-lg">Nasional</CardTitle>
             </CardHeader>
