@@ -63,3 +63,25 @@ func Feedback(r *gin.Engine) {
 		Feedback.GET("", handlers.GetAllFeedbacks)
 	}
 }
+
+func SmartContract(router *gin.Engine) {
+	api := router.Group("/api/v1")
+	{
+		// Proposal endpoints
+		api.POST("/proposals", handlers.SubmitProposalHandler)
+		api.GET("/proposals/pending", handlers.GetPendingProposalsHandler)
+		api.GET("/proposals/status/:status", handlers.GetProposalsByStatusHandler)
+		api.GET("/proposals/user/:address", handlers.GetUserProposalsHandler)
+		api.GET("/proposals/:id", handlers.GetProposalHandler)
+		api.POST("/proposals/:id/approve", handlers.ApproveProposalHandler)
+		api.POST("/proposals/:id/reject", handlers.RejectProposalHandler)
+
+		// Fund management endpoints
+		api.POST("/deposit", handlers.DepositHandler)
+		api.POST("/release", handlers.ReleaseFundsHandler)
+
+		// Info endpoints
+		api.GET("/balance", handlers.GetContractBalanceHandler)
+		api.GET("/available-funds", handlers.GetAvailableFundsHandler)
+	}
+}
