@@ -16,7 +16,7 @@ import Tentang from "./pages/Tentang";
 
 // --- Halaman-halaman untuk POV Pengusul ---
 import ProposerDashboardPage from "./pages/proposer/DashboardPage";
-import NewProposalPage from '@/components/proposer/NewProposalPage';
+import NewProposalPage from "./components/proposer/NewProposalPage";
 
 const queryClient = new QueryClient();
 
