@@ -11,6 +11,7 @@ import (
 func AuthRoutes(r *gin.Engine) {
 	r.POST("/register", handlers.Register)
 	r.POST("/login", handlers.Login)
+
 }
 
 func ProjectRoutes(r *gin.Engine) {
@@ -84,4 +85,16 @@ func SmartContract(router *gin.Engine) {
 		api.GET("/balance", handlers.GetContractBalanceHandler)
 		api.GET("/available-funds", handlers.GetAvailableFundsHandler)
 	}
+}
+
+func WalletRoutes(r *gin.Engine) {
+	api := r.Group("/api")
+
+	// auth normal
+
+	// wallet
+	api.GET("/wallet/nonce", handlers.GenerateNonce)
+	api.POST("/wallet/verify", handlers.VerifyWallet)
+
+	// dashboard (protected)
 }
