@@ -50,7 +50,7 @@ const Index = () => {
               <div className="flex flex-col sm:flex-row gap-4 pt-6">
                 <div className="inline-block">
                   <div className="text-center bg-white/10 backdrop-blur-sm px-6 py-3 rounded-lg">
-                    <div className="text-2xl font-bold text-accent">34</div>
+                    <div className="text-2xl font-bold text-accent">38</div>
                     <div className="text-sm text-white/80">Provinsi</div>
                   </div>
                 </div>
