@@ -1,4 +1,3 @@
-// repositories/project_repository.go
 package repositories
 
 import (
@@ -22,9 +21,12 @@ func (r *ProjectRepository) CreateProject(project models.Proyek) error {
 			{
 				"judul":           project.Judul,
 				"deskripsi":       project.Deskripsi,
-				"budget":          project.Budget, // ✅ budget ikut disimpan
+				"budget":          project.Budget,
 				"project_manager": project.ProjectManager,
-				"gambar_url":      project.Gambar, // ✅ pakai nama kolom yang benar
+				"gambar_url":      project.GambarURL,
+				"region_id":       project.RegionID,
+				"status":          project.Status,
+				"kategori":        project.Kategori,
 			},
 		}, false, "", "representation", "").Execute()
 
