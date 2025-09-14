@@ -1,8 +1,10 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { MapPin, Building, Briefcase } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 interface ProvinceCardProps {
+  id: string;
   name: string;
   receivedFunds: number;
   usedFunds: number;
@@ -14,6 +16,7 @@ interface ProvinceCardProps {
 }
 
 const ProvinceCard = ({
+  id,
   name,
   receivedFunds,
   usedFunds,
@@ -23,6 +26,7 @@ const ProvinceCard = ({
   completedProjects,
   population
 }: ProvinceCardProps) => {
+  const navigate = useNavigate();
   const totalProjects = ongoingProjects + completedProjects;
   const completionRate = totalProjects > 0 ? (completedProjects / totalProjects) * 100 : 0;
   
@@ -30,8 +34,15 @@ const ProvinceCard = ({
     return `Rp ${(amount / 1000000000).toFixed(1)}M`;
   };
 
+  const handleClick = () => {
+    navigate(`/transparansi/${id}`);
+  };
+
   return (
-    <Card className="hover:shadow-lg transition-all duration-300 border-border hover:border-primary/30">
+    <Card 
+      className="hover:shadow-xl hover:scale-105 transition-all duration-300 border-border hover:border-primary/30 cursor-pointer hover:shadow-primary/20" 
+      onClick={handleClick}
+    >
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <CardTitle className="text-lg font-semibold text-foreground">{name}</CardTitle>

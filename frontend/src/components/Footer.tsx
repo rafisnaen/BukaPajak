@@ -49,7 +49,7 @@ const Footer = () => {
             <ul className="space-y-3">
               <li><a href="/dashboard" className="text-primary-foreground/80 hover:text-accent transition-smooth">Dashboard</a></li>
               <li><a href="/regional" className="text-primary-foreground/80 hover:text-accent transition-smooth">Regional</a></li>
-              <li><a href="#transparency" className="text-primary-foreground/80 hover:text-accent transition-smooth">Transparansi</a></li>
+              <li><a href="/transparansi" className="text-primary-foreground/80 hover:text-accent transition-smooth">Transparansi</a></li>
             </ul>
           </div>
 
