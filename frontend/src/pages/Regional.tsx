@@ -4,7 +4,7 @@ import Footer from "@/components/Footer";
 import SearchFilter from "@/components/ui/search-filter";
 import ProvinceCard from "@/components/ui/province-card";
 import { provinces, Province } from "@/data/provinces";
-import { MapPin, DollarSign, TrendingUp, BarChart3 } from "lucide-react";
+import { MapPin, Landmark, TrendingUp, BarChart3 } from "lucide-react";
 
 const Regional = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -79,7 +79,7 @@ const Regional = () => {
           <div className="bg-card border rounded-lg p-6">
             <div className="flex items-center space-x-3">
               <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
-                <DollarSign className="w-6 h-6 text-primary" />
+                <Landmark className="w-6 h-6 text-primary" />
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Total Dana</p>

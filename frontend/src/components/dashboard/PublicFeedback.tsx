@@ -10,50 +10,23 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
 import {
   MessageSquare,
   MapPin,
   Clock,
-  ThumbsUp,
   AlertTriangle,
 } from "lucide-react";
 
 import { createFeedback, getFeedbacks } from "@/api/feedback";
 import { Feedback } from "@/types/type";
-
-const getPriorityColor = (priority: string) => {
-  switch (priority) {
-    case "High":
-      return "bg-red-100 text-red-800";
-    case "Medium":
-      return "bg-yellow-100 text-yellow-800";
-    case "Low":
-      return "bg-green-100 text-green-800";
-    default:
-      return "bg-gray-100 text-gray-800";
-  }
-};
-
-const getStatusColor = (status: string) => {
-  switch (status) {
-    case "Under Review":
-      return "bg-blue-100 text-blue-800";
-    case "Acknowledged":
-      return "bg-green-100 text-green-800";
-    case "Responded":
-      return "bg-purple-100 text-purple-800";
-    default:
-      return "bg-gray-100 text-gray-800";
-  }
-};
+import { useToast } from "@/components/ui/use-toast";
 
 const getTypeIcon = (type: string) => {
   switch (type) {
     case "Laporan":
       return <AlertTriangle className="w-4 h-4" />;
     case "Feedback":
-      return <ThumbsUp className="w-4 h-4" />;
+      return <MessageSquare className="w-4 h-4" />;
     case "Pertanyaan":
       return <MessageSquare className="w-4 h-4" />;
     default:
@@ -70,8 +43,8 @@ export const PublicFeedback = () => {
     pesan: "",
   });
   const [feedbacks, setFeedbacks] = useState<Feedback[]>([]);
+  const { toast } = useToast();
 
-  // load feedback saat komponen mount
   useEffect(() => {
     loadFeedbacks();
   }, []);
@@ -94,11 +67,18 @@ export const PublicFeedback = () => {
     const res = await createFeedback(formData);
 
     if (res.error) {
-      alert("❌ Gagal: " + res.error);
+      toast({
+        title: "🙅 Gagal mengirim feedback",
+        description: res.error,
+        variant: "destructive",
+      });
     } else {
-      alert("✅ Feedback berhasil dikirim!");
+      toast({
+        title: "✅ Feedback berhasil dikirim",
+        description: "Terima kasih sudah memberikan masukan!",
+      });
       setFormData({ nama: "", lokasi: "", subjek: "", pesan: "" });
-      loadFeedbacks(); // refresh daftar feedback
+      loadFeedbacks(); 
     }
 
     setIsSubmitting(false);
@@ -211,36 +191,17 @@ export const PublicFeedback = () => {
                           </div>
                           <div className="flex items-center gap-1">
                             <Clock className="w-3 h-3" />
-                            {/* kalau backend simpan created_at bisa dipakai */}
                             {new Date().toLocaleDateString("id-ID")}
                           </div>
                         </div>
                       </div>
                     </div>
-                    <div className="flex gap-2">
-                      <Badge className={getPriorityColor("Medium")}>
-                        Medium
-                      </Badge>
-                      <Badge className={getStatusColor("Acknowledged")}>
-                        Acknowledged
-                      </Badge>
-                    </div>
                   </div>
 
-                  <p className="text-sm text-foreground leading-relaxed pl-11">
+                  <p className="text-sm text-foreground leading-relaxed pl-11 border-t pt-4 mt-4">
                     {fb.pesan}
                   </p>
 
-                  <div className="flex justify-between items-center pt-2 border-t pl-11">
-                    <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                      <ThumbsUp className="w-4 h-4" />
-                      0 orang menyukai ini
-                    </div>
-                    <Button variant="ghost" size="sm">
-                      <ThumbsUp className="w-4 h-4 mr-1" />
-                      Setuju
-                    </Button>
-                  </div>
                 </div>
               ))
             )}
