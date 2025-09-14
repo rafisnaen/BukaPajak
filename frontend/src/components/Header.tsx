@@ -32,10 +32,10 @@ const Header = () => {
             <a href="/regional" className="text-foreground hover:text-primary transition-smooth">
               Regional
             </a>
-            <a href="#transparency" className="text-foreground hover:text-primary transition-smooth">
+            <a href="/transparansi" className="text-foreground hover:text-primary transition-smooth">
               Transparansi
             </a>
-            <a href="/#about" className="text-foreground hover:text-primary transition-smooth">
+            <a href="/tentang" className="text-foreground hover:text-primary transition-smooth">
               Tentang
             </a>
           </nav>
@@ -71,10 +71,10 @@ const Header = () => {
               <a href="/regional" onClick={handleLinkClick} className="text-foreground hover:text-primary transition-smooth">
                 Regional
               </a>
-              <a href="#transparency" onClick={handleLinkClick} className="text-foreground hover:text-primary transition-smooth">
+              <a href="/transparansi" onClick={handleLinkClick} className="text-foreground hover:text-primary transition-smooth">
                 Transparansi
               </a>
-              <a href="/#about" onClick={handleLinkClick} className="text-foreground hover:text-primary transition-smooth">
+              <a href="/tentang" onClick={handleLinkClick} className="text-foreground hover:text-primary transition-smooth">
                 Tentang
               </a>
               <div className="flex flex-col space-y-2 pt-2">

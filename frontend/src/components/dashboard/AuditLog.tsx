@@ -1,7 +1,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ExternalLink, Shield, Clock, DollarSign } from "lucide-react";
+import { ExternalLink, Shield, Clock, Landmark } from "lucide-react";
 
 const auditLogData = [
   {
@@ -65,10 +65,10 @@ const formatRupiah = (value: number) => {
 
 const formatRupiahShort = (value: number) => {
   if (value >= 1000000000000) {
-    return `${(value / 1000000000000).toFixed(1)}T`;
+    return `Rp${(value / 1000000000000).toFixed(1)}T`;
   }
   if (value >= 1000000000) {
-    return `${(value / 1000000000).toFixed(1)}M`;
+    return `Rp${(value / 1000000000).toFixed(1)}M`;
   }
   return formatRupiah(value);
 };
@@ -91,7 +91,7 @@ const getTypeColor = (type: string) => {
 const getTypeIcon = (type: string) => {
   switch (type) {
     case "Transfer Dana":
-      return <DollarSign className="w-4 h-4" />;
+      return <Landmark className="w-4 h-4" />;
     case "Allocation":
       return <Shield className="w-4 h-4" />;
     case "Expense Report":

@@ -5,11 +5,12 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
-import LoginPage from "./pages/LoginPage"; // 1. Impor komponen LoginPage
-import RegisterPage from "./pages/RegisterPage"; // 2. Impor komponen RegisterPage
+import LoginPage from "./pages/LoginPage";
+import RegisterPage from "./pages/RegisterPage";
 import DashboardPage from "./pages/DashboardPage";
-import Footer from "./components/Footer";
 import Regional from "./pages/Regional";
+import Transparansi from "./pages/Transparansi";
+import Tentang from "./pages/Tentang";
 
 const queryClient = new QueryClient();
 
@@ -21,10 +22,14 @@ const App = () => (
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Index />} />
-          <Route path="/login" element={<LoginPage />} /> {/* 2. Tambahkan rute untuk halaman login */}
-          <Route path="/register" element={<RegisterPage />} /> {/* 3. Tambahkan rute untuk halaman register */}
-          <Route path="/dashboard" element={<DashboardPage />} /> {/* 4. Tambahkan rute untuk halaman dashboard */} 
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<RegisterPage />} />
+          <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/regional" element={<Regional />} />
+          <Route path="/transparansi/:provinceId" element={<Transparansi />} />
+          {/* Rute lama bisa dihapus atau disimpan jika ada halaman /transparansi tanpa ID */}
+          <Route path="/transparansi" element={<Transparansi />} />
+          <Route path="/tentang" element={<Tentang />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

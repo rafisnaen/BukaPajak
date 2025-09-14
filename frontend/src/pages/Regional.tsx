@@ -1,10 +1,10 @@
 import { useState, useMemo } from "react";
 import Header from "@/components/Header";
-import Footer from "@/components/Footer";
 import SearchFilter from "@/components/ui/search-filter";
 import ProvinceCard from "@/components/ui/province-card";
 import { provinces, Province } from "@/data/provinces";
 import { MapPin, DollarSign, TrendingUp, BarChart3 } from "lucide-react";
+import Footer from "@/components/Footer";
 
 const Regional = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -62,7 +62,8 @@ const Regional = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="min-h-screen bg-background">
+      <Header />
       
       <main className="container mx-auto px-4 pt-24 pb-8">
         {/* Header Section */}
@@ -72,7 +73,6 @@ const Regional = () => {
             Monitoring distribusi dan penggunaan dana APBN di 38 provinsi Indonesia
           </p>
         </div>
-        <Header />
 
         {/* Statistics Overview */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
@@ -141,6 +141,7 @@ const Regional = () => {
           {filteredAndSortedProvinces.map((province) => (
             <ProvinceCard
               key={province.id}
+              id={province.id}
               name={province.name}
               receivedFunds={province.receivedFunds}
               usedFunds={province.usedFunds}
@@ -159,8 +160,8 @@ const Regional = () => {
             Menampilkan {filteredAndSortedProvinces.length} dari {provinces.length} provinsi
           </p>
         </div>
+        <Footer />
       </main>
-      <Footer />
     </div>
   );
 };

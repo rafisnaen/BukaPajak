@@ -1,6 +1,6 @@
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { TrendingUp, DollarSign, Users, FileCheck } from "lucide-react";
+import { TrendingUp, Landmark, Users, FileCheck } from "lucide-react";
 
 const statsData = [
   {
@@ -8,7 +8,7 @@ const statsData = [
     value: "Rp 2.000T",
     change: "+12.5%",
     changeType: "positive",
-    icon: DollarSign,
+    icon: Landmark,
     description: "vs tahun lalu"
   },
   {
@@ -21,7 +21,7 @@ const statsData = [
   },
   {
     title: "Regional Aktif",
-    value: "34 Provinsi",
+    value: "38 Provinsi",
     change: "100%",
     changeType: "positive",
     icon: Users,
