@@ -1,33 +1,36 @@
+// App.tsx
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
-// Halaman-halaman Publik
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
-import DashboardPage from "./pages/DashboardPage"; // Ini adalah dashboard publik
+import DashboardPage from "./pages/DashboardPage";
 import Regional from "./pages/Regional";
 import Transparansi from "./pages/Transparansi";
 import Tentang from "./pages/Tentang";
 
-// --- Halaman-halaman untuk POV Pengusul ---
+// --- Halaman Pengusul ---
 import ProposerDashboardPage from "./pages/proposer/DashboardPage";
 import NewProposalPage from "./pages/proposer/NewProposalPage";
 import HistoryPage from "./pages/proposer/HistoryPage";
 
-// --- Halaman-halaman untuk POV Auditor ---
+// --- Halaman Auditor ---
 import AuditorDashboardPage from "./pages/auditor/DashboardPage";
 import AuditorReviewPage from "./pages/auditor/ReviewPage";
 import RoleManagementPage from "./pages/auditor/RoleManagementPage";
-import AuditorHistoryPage from "./pages/auditor/HistoryPage"; // Impor halaman baru
-import AuditorHistoryDetailPage from "./pages/auditor/HistoryDetailPage"; // Impor halaman baru
+import AuditorHistoryPage from "./pages/auditor/HistoryPage";
+import AuditorHistoryDetailPage from "./pages/auditor/HistoryDetailPage";
 
-// --- Halaman-halaman untuk POV Owner ---
+// --- Halaman Owner ---
 import OwnerDashboardPage from "./pages/owner/DashboardPage";
+
+// ✅ Import ProtectedRoute
+import { ProtectedRoute } from "./components/Security/ProtectedRoute";
 
 const queryClient = new QueryClient();
 
@@ -48,22 +51,43 @@ const App = () => (
           <Route path="/transparansi" element={<Transparansi />} />
           <Route path="/tentang" element={<Tentang />} />
 
-          {/* --- Rute Khusus Pengusul (setelah login) --- */}
-          <Route path="/proposer/dashboard" element={<ProposerDashboardPage />} />
-          <Route path="/proposer/new" element={<NewProposalPage />} />
-          <Route path="/proposer/history" element={<HistoryPage />} />
+          {/* --- Rute Khusus Pengusul (Protected) --- */}
+          <Route
+            path="/proposer/dashboard"
+            element={
+              <ProtectedRoute>
+                <ProposerDashboardPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/proposer/new"
+            element={
+              <ProtectedRoute>
+                <NewProposalPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/proposer/history"
+            element={
+              <ProtectedRoute>
+                <HistoryPage />
+              </ProtectedRoute>
+            }
+          />
 
-          {/* --- Rute Khusus Auditor (setelah login) --- */}
+          {/* --- Rute Khusus Auditor --- */}
           <Route path="/auditor/dashboard" element={<AuditorDashboardPage />} />
           <Route path="/auditor/review/:proposalId" element={<AuditorReviewPage />} />
-          <Route path="/auditor/history" element={<AuditorHistoryPage />} /> {/* Tambahkan rute baru */}
-          <Route path="/auditor/history/:proposalId" element={<AuditorHistoryDetailPage />} /> {/* Tambahkan rute baru */}
+          <Route path="/auditor/history" element={<AuditorHistoryPage />} />
+          <Route path="/auditor/history/:proposalId" element={<AuditorHistoryDetailPage />} />
 
-          {/* --- Rute Khusus Owner (setelah login) --- */}
+          {/* --- Rute Khusus Owner --- */}
           <Route path="/owner/dashboard" element={<OwnerDashboardPage />} />
           <Route path="/owner/roles" element={<RoleManagementPage />} />
 
-          {/* Rute "Catch-all" Not Found harus selalu di paling bawah */}
+          {/* Catch-all */}
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
