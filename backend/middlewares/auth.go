@@ -11,7 +11,6 @@ import (
 
 func AuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		// Ambil token dari header Authorization
 		authHeader := c.GetHeader("Authorization")
 		if authHeader == "" {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "Authorization header missing"})
@@ -26,10 +25,8 @@ func AuthMiddleware() gin.HandlerFunc {
 			return
 		}
 
-		// Parse token
 		secret := os.Getenv("JWT_SECRET")
 		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-			// Pastikan metode signing benar
 			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 				return nil, jwt.ErrSignatureInvalid
 			}
@@ -42,7 +39,13 @@ func AuthMiddleware() gin.HandlerFunc {
 			return
 		}
 
-		// Jika valid, lanjut
+		// Ambil claims
+		if claims, ok := token.Claims.(jwt.MapClaims); ok {
+			if userID, ok := claims["user_id"].(string); ok {
+				c.Set("userId", userID)
+			}
+		}
+
 		c.Next()
 	}
 }
