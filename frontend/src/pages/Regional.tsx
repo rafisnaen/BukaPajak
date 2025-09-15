@@ -5,8 +5,10 @@ import SearchFilter from "@/components/ui/search-filter";
 import ProvinceCard from "@/components/ui/province-card";
 import { getRegions } from "@/api/region";
 import { Province } from "@/types/type";
-import { MapPin, Landmark, TrendingUp, BarChart3 } from "lucide-react";
+import { MapPin, Landmark, TrendingUp, BarChart3, ArrowLeft } from "lucide-react";
 import Footer from "@/components/Footer";
+import { Link } from "react-router-dom";
+import { Button } from "@/components/ui/button";
 
 const Regional = () => {
   const [provinces, setProvinces] = useState<Province[]>([]);
@@ -109,16 +111,28 @@ const Regional = () => {
 
   if (loading) {
     return (
-      <div className="p-6 flex justify-center items-center h-64">
-        <div className="text-lg">Memuat data...</div>
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+            <p className="text-lg text-muted-foreground">Memuat data...</p>
+        </div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="p-6 flex justify-center items-center h-64">
-        <div className="text-lg text-red-500">{error}</div>
+        <div className="min-h-screen bg-background flex items-center justify-center">
+            <div className="text-center p-6 bg-card border rounded-lg shadow-sm">
+                <h2 className="text-xl font-semibold text-destructive mb-2">Terjadi Kesalahan</h2>
+                <p className="text-muted-foreground mb-6">{error}</p>
+                <Link to="/dashboard">
+                    <Button variant="outline">
+                        <ArrowLeft className="w-4 h-4 mr-2" />
+                        Kembali ke Dashboard
+                    </Button>
+                </Link>
+            </div>
       </div>
     );
   }

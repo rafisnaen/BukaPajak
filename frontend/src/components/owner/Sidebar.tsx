@@ -7,6 +7,7 @@ import {
     ShieldAlert,
     } from "lucide-react";
     import BukaPajakLogo from "@/assets/Group 2.svg"
+import { logout } from "@/api/auth";
 
     export const Sidebar = () => {
     const location = useLocation();
@@ -52,6 +53,7 @@ import {
                 <span>Emergency Withdraw</span>
             </button>
             <button
+                onClick={logout}
                 className="flex w-full items-center p-3 rounded-lg text-slate-300 hover:bg-slate-700 hover:text-white transition-colors"
             >
                 <LogOut className="mr-3 h-5 w-5" />

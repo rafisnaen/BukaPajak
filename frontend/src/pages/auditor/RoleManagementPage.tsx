@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Copy, Save, UserPlus } from "lucide-react";
 import { useState } from "react";
+import { toast } from "sonner";
 
 // Halaman untuk mengelola alamat Auditor dan Verifier.
 const RoleManagementPage = () => {
@@ -21,35 +22,37 @@ const RoleManagementPage = () => {
     // TODO: Implementasikan fungsi handle untuk memanggil smart contract
     const handleSetAuditor = () => {
         if (!/^0x[a-fA-F0-9]{40}$/.test(newAuditor)) {
-            alert("Alamat Auditor baru tidak valid.");
+            toast.error("Alamat Auditor baru tidak valid.", {
+                description: "Harap masukkan alamat wallet Ethereum yang benar.",
+            });
             return;
         }
-        alert(`(Simulasi) Mengganti Auditor menjadi: ${newAuditor}`);
+        toast.success("Alamat Auditor Berhasil Diperbarui!", {
+            description: `(Simulasi) Auditor baru: ${newAuditor.substring(0,10)}...`
+        });
         // Panggil backend -> panggil fungsi setAuditor(newAuditor)
     };
     
     const handleSetVerifier = () => {
         if (!/^0x[a-fA-F0-9]{40}$/.test(newVerifier)) {
-            alert("Alamat Verifier baru tidak valid.");
+            toast.error("Alamat Verifier baru tidak valid.", {
+                description: "Harap masukkan alamat wallet Ethereum yang benar.",
+            });
             return;
         }
-        alert(`(Simulasi) Menambahkan Verifier baru: ${newVerifier}`);
+        toast.success("Verifier Baru Berhasil Ditambahkan!", {
+            description: `(Simulasi) Verifier baru: ${newVerifier.substring(0,10)}...`
+        });
          // Panggil backend -> panggil fungsi setVerifier(newVerifier, true)
     };
     
     const copyToClipboard = (address: string) => {
-        // 'document.execCommand' digunakan untuk kompatibilitas browser yang lebih luas di dalam iFrame
-        const textArea = document.createElement("textarea");
-        textArea.value = address;
-        document.body.appendChild(textArea);
-        textArea.select();
-        try {
-            document.execCommand('copy');
-            alert(`Alamat ${address.substring(0,10)}... disalin ke clipboard!`);
-        } catch (err) {
+        navigator.clipboard.writeText(address).then(() => {
+            toast.info("Alamat berhasil disalin ke clipboard!");
+        }).catch(err => {
             console.error('Gagal menyalin alamat: ', err);
-        }
-        document.body.removeChild(textArea);
+            toast.error("Gagal menyalin alamat.");
+        });
     };
 
     return (
@@ -124,4 +127,3 @@ const RoleManagementPage = () => {
 };
 
 export default RoleManagementPage;
-
