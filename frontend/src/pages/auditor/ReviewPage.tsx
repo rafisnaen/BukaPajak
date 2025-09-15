@@ -2,8 +2,13 @@ import { AuditorLayout } from "@/components/auditor/AuditorLayout";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { ArrowLeft, Check, Download, Info, X } from "lucide-react";
+import { useState } from "react";
 import { Link, useParams } from "react-router-dom";
+import { toast } from "sonner";
 
 // Data ini nantinya akan diambil dari API berdasarkan ID di URL
 const mockProposalDetail = {
@@ -20,21 +25,30 @@ const mockProposalDetail = {
 
 
 const AuditorReviewPage = () => {
-    // Di aplikasi nyata, useParams akan digunakan untuk fetch data proposal dari backend
     const { proposalId } = useParams();
+    const [isRejectModalOpen, setRejectModalOpen] = useState(false);
+    const [rejectionReason, setRejectionReason] = useState("");
 
-    // TODO: Tambahkan fungsi handleApprove dan handleReject
     const handleApprove = () => {
-        alert(`Proposal #${proposalId} disetujui! (Simulasi)`);
+        toast.success(`Proposal #${proposalId} disetujui!`, {
+            description: "Status proposal telah diperbarui dan notifikasi dikirim ke pengusul.",
+        });
         // Panggil API backend untuk memicu transaksi 'approveProposal'
     };
 
-    const handleReject = () => {
-        const reason = prompt("Harap masukkan alasan penolakan:");
-        if (reason) {
-            alert(`Proposal #${proposalId} ditolak dengan alasan: ${reason} (Simulasi)`);
-            // Panggil API backend untuk memicu transaksi 'rejectProposal'
+    const handleRejectSubmit = () => {
+        if (!rejectionReason.trim()) {
+            toast.error("Alasan penolakan tidak boleh kosong.");
+            return;
         }
+        
+        toast.info(`Proposal #${proposalId} ditolak.`, {
+            description: `Alasan: ${rejectionReason}`,
+        });
+        // Panggil API backend untuk memicu transaksi 'rejectProposal'
+        
+        setRejectModalOpen(false);
+        setRejectionReason("");
     };
 
     return (
@@ -66,7 +80,7 @@ const AuditorReviewPage = () => {
                             <Check className="mr-2 h-4 w-4" />
                             Approve Proposal
                         </Button>
-                        <Button onClick={handleReject} variant="destructive">
+                        <Button onClick={() => setRejectModalOpen(true)} variant="destructive">
                             <X className="mr-2 h-4 w-4" />
                             Reject Proposal
                         </Button>
@@ -102,6 +116,32 @@ const AuditorReviewPage = () => {
                     </div>
                 </div>
             </div>
+
+            {/* Dialog untuk Alasan Penolakan */}
+            <Dialog open={isRejectModalOpen} onOpenChange={setRejectModalOpen}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>Konfirmasi Penolakan Proposal</DialogTitle>
+                        <DialogDescription>
+                            Harap berikan alasan yang jelas mengapa proposal ini ditolak. Alasan ini akan dikirimkan kepada pengusul.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div className="py-4 space-y-2">
+                        <Label htmlFor="rejection-reason" className="sr-only">Alasan Penolakan</Label>
+                        <Textarea
+                            id="rejection-reason"
+                            value={rejectionReason}
+                            onChange={(e) => setRejectionReason(e.target.value)}
+                            placeholder="Contoh: Anggaran tidak realistis, deskripsi proyek kurang detail, dll."
+                            className="min-h-[120px]"
+                        />
+                    </div>
+                    <DialogFooter>
+                        <Button variant="ghost" onClick={() => setRejectModalOpen(false)}>Batal</Button>
+                        <Button variant="destructive" onClick={handleRejectSubmit}>Kirim Penolakan</Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </AuditorLayout>
     );
 };

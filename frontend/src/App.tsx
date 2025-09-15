@@ -16,14 +16,18 @@ import Tentang from "./pages/Tentang";
 
 // --- Halaman-halaman untuk POV Pengusul ---
 import ProposerDashboardPage from "./pages/proposer/DashboardPage";
-
-// FIX: Path import diubah ke folder 'pages', bukan 'components'
 import NewProposalPage from "./pages/proposer/NewProposalPage";
 import HistoryPage from "./pages/proposer/HistoryPage";
 
 // --- Halaman-halaman untuk POV Auditor ---
 import AuditorDashboardPage from "./pages/auditor/DashboardPage";
 import AuditorReviewPage from "./pages/auditor/ReviewPage";
+import RoleManagementPage from "./pages/auditor/RoleManagementPage";
+import AuditorHistoryPage from "./pages/auditor/HistoryPage"; // Impor halaman baru
+import AuditorHistoryDetailPage from "./pages/auditor/HistoryDetailPage"; // Impor halaman baru
+
+// --- Halaman-halaman untuk POV Owner ---
+import OwnerDashboardPage from "./pages/owner/DashboardPage";
 
 const queryClient = new QueryClient();
 
@@ -52,7 +56,12 @@ const App = () => (
           {/* --- Rute Khusus Auditor (setelah login) --- */}
           <Route path="/auditor/dashboard" element={<AuditorDashboardPage />} />
           <Route path="/auditor/review/:proposalId" element={<AuditorReviewPage />} />
+          <Route path="/auditor/history" element={<AuditorHistoryPage />} /> {/* Tambahkan rute baru */}
+          <Route path="/auditor/history/:proposalId" element={<AuditorHistoryDetailPage />} /> {/* Tambahkan rute baru */}
 
+          {/* --- Rute Khusus Owner (setelah login) --- */}
+          <Route path="/owner/dashboard" element={<OwnerDashboardPage />} />
+          <Route path="/owner/roles" element={<RoleManagementPage />} />
 
           {/* Rute "Catch-all" Not Found harus selalu di paling bawah */}
           <Route path="*" element={<NotFound />} />
@@ -63,4 +72,3 @@ const App = () => (
 );
 
 export default App;
-
