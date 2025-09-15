@@ -59,7 +59,7 @@ export default function Dashboard() {
               value={mockProposalSummary.approved}
               description="Telah diapprove"
               icon={CheckCircle}
-              className="border-l-4 border-l-success"
+              className="border-l-4 border-l-green-500"
             />
             <StatsCard
               title="Didanai"
