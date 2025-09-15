@@ -1,29 +1,33 @@
 // pages/Regional.tsx
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
+import Header from "@/components/Header";
+import SearchFilter from "@/components/ui/search-filter";
 import ProvinceCard from "@/components/ui/province-card";
 import { getRegions } from "@/api/region";
 import { Province } from "@/types/type";
+import { MapPin, Landmark, TrendingUp, BarChart3 } from "lucide-react";
+import Footer from "@/components/Footer";
 
 const Regional = () => {
   const [provinces, setProvinces] = useState<Province[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
-  const [sortBy, setSortBy] = useState<keyof Province>("name");
-  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
+  const [sortBy, setSortBy] = useState<keyof Province>("receivedFunds" as keyof Province);
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // fetch data dari API
+  // fetch data dari backend
   useEffect(() => {
     const fetchData = async () => {
       try {
         setLoading(true);
         const data = await getRegions();
-        console.log("Transformed provinces:", data);
-        setProvinces(data);
+        setProvinces(Array.isArray(data) ? data : []);
         setError(null);
       } catch (err) {
         console.error("Error fetching regions:", err);
         setError("Gagal memuat data provinsi");
+        setProvinces([]);
       } finally {
         setLoading(false);
       }
@@ -32,32 +36,72 @@ const Regional = () => {
     fetchData();
   }, []);
 
-  // filter + sort
+  // totals (tampilkan 0 jika tidak ada data)
+  const totals = useMemo(() => {
+    return provinces.reduce(
+      (acc, p) => {
+        const received = Number((p as any).receivedFunds) || 0;
+        const used = Number((p as any).usedFunds) || 0;
+        const remaining = Number((p as any).remainingFunds) || 0;
+        const cities = Number((p as any).cities) || 0; // fallback kalau backend menyertakan 'cities'
+        const ongoing = Number((p as any).ongoingProjects) || 0;
+        const completed = Number((p as any).completedProjects) || 0;
+
+        return {
+          totalReceived: acc.totalReceived + received,
+          totalUsed: acc.totalUsed + used,
+          totalRemaining: acc.totalRemaining + remaining,
+          totalCities: acc.totalCities + cities,
+          totalProjects: acc.totalProjects + ongoing + completed,
+        };
+      },
+      {
+        totalReceived: 0,
+        totalUsed: 0,
+        totalRemaining: 0,
+        totalCities: 0,
+        totalProjects: 0,
+      }
+    );
+  }, [provinces]);
+
+  // format currency ringkas (jika 0 -> Rp 0)
+  const formatCurrency = (amount: number) => {
+    if (!amount) return "Rp 0";
+    if (Math.abs(amount) >= 1_000_000_000_000) return `Rp ${(amount / 1_000_000_000_000).toFixed(1)}T`;
+    if (Math.abs(amount) >= 1_000_000_000) return `Rp ${(amount / 1_000_000_000).toFixed(1)}M`;
+    if (Math.abs(amount) >= 1_000_000) return `Rp ${(amount / 1_000_000).toFixed(1)}Jt`;
+    return `Rp ${amount.toLocaleString()}`;
+  };
+
+  // filter + sort (tetap bekerja dengan data backend)
   const filteredAndSortedProvinces = useMemo(() => {
     let filtered = provinces.filter((province) =>
-      (province?.name || "")
-        .toLowerCase()
-        .includes(searchQuery.toLowerCase())
+      (province?.name || "").toLowerCase().includes(searchQuery.toLowerCase())
     );
 
     filtered.sort((a, b) => {
-      let aValue: number | string = a[sortBy];
-      let bValue: number | string = b[sortBy];
+      // ambil nilai secara defensif
+      let aValue: number | string = (a as any)[sortBy] ?? 0;
+      let bValue: number | string = (b as any)[sortBy] ?? 0;
 
-      if (sortBy === "ongoingProjects" || sortBy === "completedProjects" || sortBy === "totalProjects") {
-        aValue = Number(a[sortBy]);
-        bValue = Number(b[sortBy]);
+      // kalau sortBy adalah totalProjects, hitung dari ongoing+completed
+      if (String(sortBy) === "totalProjects" || String(sortBy) === "projects") {
+        aValue = (Number((a as any).ongoingProjects) || 0) + (Number((a as any).completedProjects) || 0);
+        bValue = (Number((b as any).ongoingProjects) || 0) + (Number((b as any).completedProjects) || 0);
       }
 
-      if (sortBy === "name" || sortBy === "cityName") {
-        return sortOrder === "asc"
-          ? (aValue as string).localeCompare(bValue as string)
-          : (bValue as string).localeCompare(aValue as string);
+      // string compare untuk nama/kota
+      if (typeof aValue === "string" || typeof bValue === "string") {
+        const aStr = String(aValue || "");
+        const bStr = String(bValue || "");
+        return sortOrder === "asc" ? aStr.localeCompare(bStr) : bStr.localeCompare(aStr);
       }
 
-      return sortOrder === "asc"
-        ? (aValue as number) - (bValue as number)
-        : (bValue as number) - (aValue as number);
+      // numeric compare
+      const aNum = Number(aValue) || 0;
+      const bNum = Number(bValue) || 0;
+      return sortOrder === "asc" ? aNum - bNum : bNum - aNum;
     });
 
     return filtered;
@@ -80,68 +124,108 @@ const Regional = () => {
   }
 
   return (
-    <div className="p-6">
-      {/* Search & Sort Controls */}
-      <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
-        <input
-          type="text"
-          placeholder="Cari provinsi..."
-          className="border px-4 py-2 rounded-md w-full md:w-1/3"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-        />
+    <div className="min-h-screen bg-background">
+      <Header />
 
-        <div className="flex items-center gap-2">
-          <select
-            className="border px-3 py-2 rounded-md"
-            value={sortBy}
-            onChange={(e) => setSortBy(e.target.value as keyof Province)}
-          >
-            <option value="name">Nama</option>
-            <option value="receivedFunds">Dana Diterima</option>
-            <option value="usedFunds">Dana Terpakai</option>
-            <option value="remainingFunds">Sisa Dana</option>
-            <option value="cityName">Nama Kota</option>
-            <option value="ongoingProjects">Proyek Berlangsung</option>
-            <option value="completedProjects">Proyek Selesai</option>
-            <option value="totalProjects">Total Proyek</option>
-            <option value="population">Populasi</option>
-          </select>
-
-          <button
-            className="border px-3 py-2 rounded-md"
-            onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}
-          >
-            {sortOrder === "asc" ? "⬆️ Asc" : "⬇️ Desc"}
-          </button>
+      <main className="container mx-auto px-4 pt-24 pb-8">
+        {/* Header Section */}
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-foreground mb-2">Regional Transparansi Dana</h1>
+          <p className="text-muted-foreground">
+            Monitoring distribusi dan penggunaan dana APBN di 38 provinsi Indonesia
+          </p>
         </div>
-      </div>
 
-      {/* Province Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredAndSortedProvinces.map((province) => (
-          <ProvinceCard
-            key={province.id}
-            id={province.id}
-            name={province.name}
-            receivedFunds={province.receivedFunds}
-            usedFunds={province.usedFunds}
-            remainingFunds={province.remainingFunds}
-            cityName={province.cityName}
-            ongoingProjects={province.ongoingProjects}
-            completedProjects={province.completedProjects}
-            population={province.population}
+        {/* Statistics Overview */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <div className="bg-card border rounded-lg p-6">
+            <div className="flex items-center space-x-3">
+              <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
+                <Landmark className="w-6 h-6 text-primary" />
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Total Dana</p>
+                <p className="text-xl font-bold text-foreground">{formatCurrency(totals.totalReceived)}</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-card border rounded-lg p-6">
+            <div className="flex items-center space-x-3">
+              <div className="w-12 h-12 bg-secondary/10 rounded-lg flex items-center justify-center">
+                <TrendingUp className="w-6 h-6 text-secondary" />
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Dana Terpakai</p>
+                <p className="text-xl font-bold text-foreground">{formatCurrency(totals.totalUsed)}</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-card border rounded-lg p-6">
+            <div className="flex items-center space-x-3">
+              <div className="w-12 h-12 bg-success/10 rounded-lg flex items-center justify-center">
+                <MapPin className="w-6 h-6 text-success" />
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Total Kota/Kab</p>
+                <p className="text-xl font-bold text-foreground">{totals.totalCities ?? 0}</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-card border rounded-lg p-6">
+            <div className="flex items-center space-x-3">
+              <div className="w-12 h-12 bg-accent/10 rounded-lg flex items-center justify-center">
+                <BarChart3 className="w-6 h-6 text-accent" />
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Total Proyek</p>
+                <p className="text-xl font-bold text-foreground">{totals.totalProjects ?? 0}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Search and Filter (pakai komponen SearchFilter dari page lama) */}
+        <div className="mb-8">
+          <SearchFilter
+            onSearch={setSearchQuery}
+            onSort={(sortField: any, order: "asc" | "desc") => {
+              // Pastikan sortField matching key di Province
+              setSortBy(sortField as keyof Province);
+              setSortOrder(order);
+            }}
           />
-        ))}
-      </div>
-
-      {filteredAndSortedProvinces.length === 0 && (
-        <div className="text-center py-12 text-muted-foreground">
-          {provinces.length === 0 
-            ? "Tidak ada data provinsi" 
-            : "Tidak ditemukan provinsi yang sesuai dengan pencarian"}
         </div>
-      )}
+
+        {/* Province Cards Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredAndSortedProvinces.map((province) => (
+            <ProvinceCard
+              key={(province as any).id ?? province.name}
+              id={(province as any).id ?? province.name}
+              name={province.name ?? "—"}
+              receivedFunds={Number((province as any).receivedFunds) || 0}
+              usedFunds={Number((province as any).usedFunds) || 0}
+              remainingFunds={Number((province as any).remainingFunds) || 0}
+              cityName={(province as any).cityName ?? ""}
+              ongoingProjects={Number((province as any).ongoingProjects) || 0}
+              completedProjects={Number((province as any).completedProjects) || 0}
+              population={Number((province as any).population) || 0}
+            />
+          ))}
+        </div>
+
+        {/* Results Counter */}
+        <div className="mt-8 text-center">
+          <p className="text-muted-foreground">
+            Menampilkan {filteredAndSortedProvinces.length} dari {provinces.length} provinsi
+          </p>
+        </div>
+
+        <Footer />
+      </main>
     </div>
   );
 };
