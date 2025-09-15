@@ -5,6 +5,7 @@ import (
 	"backend/repositories"
 	"backend/schemas"
 	"backend/utils"
+	"fmt"
 	"net/http"
 	"os"
 
@@ -60,6 +61,12 @@ func Login(c *gin.Context) {
 		return
 	}
 
-	token, _ := utils.GenerateJWT(user.Email)
+	// In Login
+	token, err := utils.GenerateJWT(fmt.Sprintf("%d", user.ID), user.Email) // cast int to string
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to generate token"})
+		return
+	}
+
 	c.JSON(http.StatusOK, gin.H{"token": token})
 }

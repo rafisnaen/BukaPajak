@@ -111,3 +111,15 @@ func WalletRoutes(r *gin.Engine) {
 
 	// dashboard (protected)
 }
+
+// routes/proposal_routes.go
+func ProposalRoutes(r *gin.Engine) {
+	api := r.Group("/api/v1")
+	api.Use(middlewares.AuthMiddleware()) // protect with JWT
+	{
+		api.POST("/proposals/upload", handlers.UploadProposalHandler) // Use the wrapper handler
+		api.GET("/proposals", handlers.GetAllProposalsHandler)
+		api.GET("/proposals/me", handlers.GetUserProposalsHandler)
+		api.GET("", handlers.CheckConfigHandler)
+	}
+}
