@@ -56,7 +56,7 @@ func VerifyWallet(c *gin.Context) {
 		[]byte(fmt.Sprintf("\x19Ethereum Signed Message:\n%d%s", len(message), message)),
 	)
 
-	// parse signature - FIXED: Remove the empty declaration
+	// parse signature
 	sig, err := hex.DecodeString(req.Signature[2:]) // hapus "0x"
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid signature"})
@@ -75,7 +75,7 @@ func VerifyWallet(c *gin.Context) {
 	}
 	recoveredAddr := crypto.PubkeyToAddress(*pubKey).Hex()
 
-	// cek apakah sama dengan address yang dikirim - FIXED: Use strings.EqualFold
+	// cek apakah sama dengan address yang dikirim
 	if !strings.EqualFold(recoveredAddr, req.Address) {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "address mismatch"})
 		return
@@ -87,17 +87,23 @@ func VerifyWallet(c *gin.Context) {
 		return
 	}
 
-	// GENERATE JWT TOKEN using your existing utility
-	// In VerifyWallet
-	token, err := utils.GenerateJWT(req.Address, req.Email)
+	// ✅ ambil user dari DB by email, bukan address
+	users, err := repositories.GetUserByEmail(req.Email)
+	if err != nil || len(users) == 0 {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not found"})
+		return
+	}
+	user := users[0]
+
+	// ✅ pakai user.ID (int)
+	token, err := utils.GenerateJWT(int(user.ID), user.Email)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to generate token"})
 		return
 	}
 
-	// Return the token to frontend - THIS IS WHAT YOUR FRONTEND EXPECTS
 	c.JSON(http.StatusOK, gin.H{
-		"token":   token, // Frontend expects this field
+		"token":   token,
 		"message": "Wallet connected successfully",
 	})
 }

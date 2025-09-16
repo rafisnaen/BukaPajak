@@ -3,7 +3,6 @@ package middlewares
 import (
 	"net/http"
 	"os"
-	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
@@ -18,12 +17,7 @@ func AuthMiddleware() gin.HandlerFunc {
 			return
 		}
 
-		tokenString := strings.TrimPrefix(authHeader, "Bearer ")
-		if tokenString == "" {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid token format"})
-			c.Abort()
-			return
-		}
+		tokenString := authHeader[len("Bearer "):]
 
 		secret := os.Getenv("JWT_SECRET")
 		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
@@ -39,10 +33,10 @@ func AuthMiddleware() gin.HandlerFunc {
 			return
 		}
 
-		// Ambil claims
 		if claims, ok := token.Claims.(jwt.MapClaims); ok {
-			if userID, ok := claims["user_id"].(string); ok {
-				c.Set("userId", userID)
+			// ✅ sekarang ambil user_id sebagai float64 -> convert ke int
+			if userID, ok := claims["user_id"].(float64); ok {
+				c.Set("userId", int(userID))
 			}
 		}
 

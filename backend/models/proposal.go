@@ -9,5 +9,5 @@ type Proposal struct {
 	UpdatedAt      time.Time `json:"updated_at"`
 	StatusProposal string    `json:"status_proposal"`
 	UserID         int64     `json:"user_id"`
-	ProjectID      int64     `json:"project_id"` // ✅ tambahkan relasi ke proyek
+	ProjectID      int64     `json:"project_id"`
 }

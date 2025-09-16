@@ -6,18 +6,21 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"time"
 )
 
 // ✅ Create proposal with better error handling
 func CreateProposal(proposal models.Proposal) error {
-	fmt.Printf("DEBUG: Inserting proposal to database: %+v\n", proposal)
-
 	insertData := map[string]interface{}{
 		"file_url":        proposal.FileURL,
 		"status_proposal": proposal.StatusProposal,
 		"user_id":         proposal.UserID,
 		"project_id":      proposal.ProjectID,
+		"created_at":      time.Now(),
+		"updated_at":      time.Now(),
 	}
+
+	fmt.Printf("DEBUG Insert Proposal Data: %+v\n", insertData)
 
 	var inserted []models.Proposal
 	count, err := configs.Supabase.
@@ -26,22 +29,11 @@ func CreateProposal(proposal models.Proposal) error {
 		ExecuteTo(&inserted)
 
 	if err != nil {
-		fmt.Printf("DEBUG: Supabase proposal insert error: %v\n", err)
-		return fmt.Errorf("supabase proposal insert failed: %w", err)
+		return fmt.Errorf("supabase insert failed: %w", err)
 	}
-
-	// Check if any rows were inserted instead of checking status
-	if count == 0 {
-		fmt.Printf("DEBUG: No rows were inserted for proposal\n")
-		return fmt.Errorf("no proposal rows were inserted")
+	if count == 0 || len(inserted) == 0 {
+		return fmt.Errorf("no rows were inserted")
 	}
-
-	if len(inserted) == 0 {
-		fmt.Printf("DEBUG: No proposal returned from insert\n")
-		return fmt.Errorf("no proposal returned from insert")
-	}
-
-	fmt.Printf("DEBUG: Proposal inserted successfully with ID: %d\n", inserted[0].ID)
 	return nil
 }
 

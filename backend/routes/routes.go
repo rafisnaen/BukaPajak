@@ -27,17 +27,15 @@ func ProjectRoutes(r *gin.Engine) {
 	}
 }
 func RegionRoutes(r *gin.Engine) {
-
-	api := r.Group("/admin/region")
-	api.Use(middlewares.AuthMiddleware())
+	api := r.Group("/api/v1/regions") // ✅ konsisten dengan frontend
 	{
+		// Public GET
+		api.GET("", handlers.GetAllRegions)
+
+		// Protected POST
+		api.Use(middlewares.AuthMiddleware())
 		api.POST("", handlers.CreateRegionHandler)
 	}
-	publicApi := r.Group("/admin/region")
-	{
-		publicApi.GET("", handlers.GetAllRegions)
-	}
-
 }
 
 func ProgressRoutes(r *gin.Engine) {

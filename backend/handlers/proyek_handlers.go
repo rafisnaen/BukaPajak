@@ -47,7 +47,7 @@ func (h *ProjectHandler) CreateProject(c *gin.Context) {
 		Budget:    req.Budget,
 		GambarURL: filePath,
 		RegionID:  &req.RegionID,
-		Status:    "pending",
+		Status:    "belum dimulai",
 		Kategori:  req.Kategori,
 	}
 

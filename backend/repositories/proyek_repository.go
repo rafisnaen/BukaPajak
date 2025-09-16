@@ -63,12 +63,13 @@ func (r *ProjectRepository) CreateProject(project models.Proyek) (int64, error) 
 }
 
 // ✅ Check if region exists (helper function)
-func (r *ProjectRepository) CheckRegionExists(regionID int) (bool, error) {
+// ✅ Check if region exists (helper function)
+func (r *ProjectRepository) CheckRegionExists(regionID int64) (bool, error) {
 	var regions []models.Region
 	_, err := configs.Supabase.
 		From("region_data").
 		Select("id", "", false).
-		Eq("id", strconv.Itoa(regionID)).
+		Eq("id", strconv.FormatInt(regionID, 10)). // ✅ parse int64 -> string
 		ExecuteTo(&regions)
 
 	if err != nil {
