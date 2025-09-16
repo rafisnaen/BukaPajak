@@ -5,48 +5,51 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { UploadCloud, Loader2 } from "lucide-react";
+import { uploadProposalAndProject } from "@/api/proposal";
+import { toast } from "sonner"; // ✅ pakai sonner untuk notifikasi
+import { useNavigate } from "react-router-dom"; // ✅ untuk redirect
 
-// Ini adalah komponen form interaktif.
 export const NewProposalForm = () => {
     const [projectName, setProjectName] = useState("");
     const [amount, setAmount] = useState("");
     const [projectType, setProjectType] = useState("");
     const [description, setDescription] = useState("");
-    const [file, setFile] = useState<File | null>(null);
+    const [proposalFile, setProposalFile] = useState<File | null>(null);
+    const [imageFile, setImageFile] = useState<File | null>(null);
     const [isLoading, setIsLoading] = useState(false);
+
+    const navigate = useNavigate();
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        setIsLoading(true);
 
-        // Validasi sederhana
-        if (!projectName || !amount || !projectType || !description || !file) {
-            alert("Harap isi semua kolom dan upload dokumen proposal.");
-            setIsLoading(false);
+        if (!proposalFile || !imageFile) {
+            toast.error("Harap unggah dokumen proposal dan gambar proyek.");
             return;
         }
 
-        console.log({
-            projectName,
-            amount,
-            projectType,
-            description,
-            fileName: file.name,
-        });
+        try {
+            setIsLoading(true);
 
-        // --- LANGKAH SELANJUTNYA ADA DI SINI ---
-        // 1. Panggil API backend untuk upload file ke IPFS.
-        // const ipfsHash = await uploadToIpfs(file);
+            const data = new FormData();
+            data.append("judul", projectName);
+            data.append("kategori", projectType);
+            data.append("deskripsi", description);
+            data.append("budget", amount);
+            data.append("region_id", "1"); // sementara default, bisa dihubungkan ke dropdown region
+            data.append("gambar", imageFile);
+            data.append("proposal", proposalFile);
 
-        // 2. Tampilkan pop-up MetaMask untuk menandatangani transaksi.
-        // await submitToSmartContract(ipfsHash, amount, projectType, description);
-        
-        // Simulasi proses
-        setTimeout(() => {
-            alert("Proposal berhasil diajukan! (Simulasi)");
+            await uploadProposalAndProject(data);
+
+            toast.success("Proposal berhasil diajukan! Menunggu review dari auditor.");
+            navigate("/proposer/dashboard");
+        } catch (error) {
+            console.error(error);
+            toast.error("Gagal mengajukan proposal, coba lagi.");
+        } finally {
             setIsLoading(false);
-            // TODO: Arahkan pengguna kembali ke dashboard setelah berhasil.
-        }, 2000);
+        }
     };
 
     return (
@@ -86,11 +89,11 @@ export const NewProposalForm = () => {
                             <SelectValue placeholder="Pilih kategori proyek" />
                         </SelectTrigger>
                         <SelectContent>
-                            <SelectItem value="0">Infrastruktur</SelectItem>
-                            <SelectItem value="1">Pendidikan</SelectItem>
-                            <SelectItem value="2">Kesehatan</SelectItem>
-                            <SelectItem value="3">Pertahanan</SelectItem>
-                            <SelectItem value="4">Lainnya</SelectItem>
+                            <SelectItem value="infrastruktur">Infrastruktur</SelectItem>
+                            <SelectItem value="pendidikan">Pendidikan</SelectItem>
+                            <SelectItem value="kesehatan">Kesehatan</SelectItem>
+                            <SelectItem value="pertahanan">Pertahanan</SelectItem>
+                            <SelectItem value="lainnya">Lainnya</SelectItem>
                         </SelectContent>
                     </Select>
                 </div>
@@ -109,22 +112,40 @@ export const NewProposalForm = () => {
                 />
             </div>
 
-            {/* Upload Dokumen */}
+            {/* Upload Gambar */}
+            <div className="space-y-2">
+                <Label htmlFor="image-upload" className="text-lg font-semibold">Gambar Proyek</Label>
+                <div className="border-2 border-dashed rounded-lg p-6 text-center">
+                    <UploadCloud className="mx-auto h-12 w-12 text-gray-400" />
+                    <Label htmlFor="image-upload" className="mt-2 block text-sm font-medium text-primary cursor-pointer">
+                        {imageFile ? `File terpilih: ${imageFile.name}` : "Pilih gambar proyek"}
+                    </Label>
+                    <Input
+                        id="image-upload"
+                        type="file"
+                        className="sr-only"
+                        onChange={(e) => e.target.files && setImageFile(e.target.files[0])}
+                        accept="image/*"
+                    />
+                </div>
+            </div>
+
+            {/* Upload Proposal */}
             <div className="space-y-2">
                 <Label htmlFor="file-upload" className="text-lg font-semibold">Dokumen Proposal (PDF)</Label>
                 <div className="border-2 border-dashed rounded-lg p-6 text-center">
                     <UploadCloud className="mx-auto h-12 w-12 text-gray-400" />
                     <Label htmlFor="file-upload" className="mt-2 block text-sm font-medium text-primary cursor-pointer">
-                        {file ? `File terpilih: ${file.name}` : "Pilih file untuk di-upload"}
+                        {proposalFile ? `File terpilih: ${proposalFile.name}` : "Pilih file untuk di-upload"}
                     </Label>
-                    <Input 
-                        id="file-upload" 
-                        type="file" 
-                        className="sr-only" 
-                        onChange={(e) => e.target.files && setFile(e.target.files[0])}
+                    <Input
+                        id="file-upload"
+                        type="file"
+                        className="sr-only"
+                        onChange={(e) => e.target.files && setProposalFile(e.target.files[0])}
                         accept=".pdf"
                     />
-                     <p className="mt-1 text-xs text-gray-500">Hanya format PDF, maksimal 10MB.</p>
+                    <p className="mt-1 text-xs text-gray-500">Hanya format PDF, maksimal 10MB.</p>
                 </div>
             </div>
 
