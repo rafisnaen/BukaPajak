@@ -55,6 +55,7 @@ export default function UploadProposal() {
     projectName: "",
     ethAmount: "",
     regionId: "",
+    address: "",
     category: "",
     description: "",
   });
@@ -206,6 +207,10 @@ export default function UploadProposal() {
       errors.regionId = "Provinsi wajib dipilih";
     }
 
+    if (!formData.address.trim()) {
+      errors.address = "Alamat wajib diisi";
+    }
+
     if (!formData.category) {
       errors.category = "Kategori proyek wajib dipilih";
     }
@@ -276,6 +281,7 @@ export default function UploadProposal() {
       submitFormData.append("kategori", formData.category);
       submitFormData.append("deskripsi", formData.description.trim());
       submitFormData.append("budget", formData.ethAmount);
+      submitFormData.append("alamat", formData.address.trim());
       
       // Region ID
       if (formData.regionId) {
@@ -319,6 +325,7 @@ export default function UploadProposal() {
       projectName: "",
       ethAmount: "",
       regionId: "",
+      address: "",
       category: "",
       description: "",
     });
@@ -486,6 +493,20 @@ export default function UploadProposal() {
                       </SelectContent>
                     </Select>
                     {renderValidationError("regionId")}
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="address">
+                      Alamat <span className="text-red-500">*</span>
+                    </Label>
+                    <Input 
+                      id="address" 
+                      placeholder="Masukkan alamat lengkap proyek" 
+                      value={formData.address} 
+                      onChange={(e) => handleInputChange("address", e.target.value)} 
+                      className={validationErrors.address ? "border-red-500" : ""}
+                    />
+                    {renderValidationError("address")}
                   </div>
                   
                   <div className="space-y-2">
