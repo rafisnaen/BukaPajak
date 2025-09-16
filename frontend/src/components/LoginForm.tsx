@@ -1,3 +1,4 @@
+// src/components/LoginForm.tsx
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -28,6 +29,13 @@ export const LoginForm = () => {
   const navigate = useNavigate();
 
   const redirectPath = '/verify-role';
+
+  // Fungsi untuk memformat alamat wallet
+  const formatAddress = (address: string | null) => {
+    if (!address) return "";
+    // Menampilkan 4 karakter setelah '0x' dan 4 karakter terakhir
+    return `${address.substring(0, 6)}....${address.substring(address.length - 4)}`;
+  };
 
   useEffect(() => {
     const checkWalletConnection = async () => {
@@ -84,29 +92,20 @@ export const LoginForm = () => {
     setIsLoading(true);
 
     try {
-      // Langkah 1: Login dengan email & password untuk membuat sesi awal.
       const loginResponse = await login({ email, password });
-
-      // Langkah 2: Dapatkan nonce dari backend untuk proses penandatanganan pesan.
       const nonceRes = await getNonce(email);
       const nonce = nonceRes.nonce;
-
-      // Langkah 3: Minta pengguna untuk menandatangani pesan melalui MetaMask.
       const message = `Login BukaPajak: ${nonce}`;
       const signature = await window.ethereum.request({
         method: "personal_sign",
         params: [message, walletAddress],
       });
-
-      // Langkah 4: Kirim signature ke backend untuk diverifikasi dan ditautkan ke akun.
       const verifyRes = await verifyWallet(email, walletAddress!, signature);
 
-      // Langkah 5: (PENTING) Perbarui token di localStorage jika backend mengirimkan token baru setelah verifikasi wallet.
       if (verifyRes.token) {
         localStorage.setItem("token", verifyRes.token);
       }
 
-      // Langkah 6: Perbarui data pengguna di localStorage untuk menyertakan alamat wallet.
       const updatedUser = { ...loginResponse.user, walletAddress: walletAddress };
       localStorage.setItem("user", JSON.stringify(updatedUser));
 
@@ -118,7 +117,6 @@ export const LoginForm = () => {
       navigate(redirectPath);
 
     } catch (err: any) {
-      // Bersihkan sesi jika terjadi kegagalan
       localStorage.removeItem("token");
       localStorage.removeItem("user");
       
@@ -167,7 +165,7 @@ export const LoginForm = () => {
              {isWalletConnected && (
                 <div className="flex items-center justify-center p-2 rounded-lg bg-green-100 text-green-800">
                     <CheckCircle className="h-4 w-4 mr-2" />
-                    <p className="text-sm font-mono truncate">{walletAddress}</p>
+                    <p className="text-sm font-mono">{formatAddress(walletAddress)}</p>
                 </div>
             )}
           </div>

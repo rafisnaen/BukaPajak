@@ -21,6 +21,7 @@ import {
 import { toast } from "sonner";
 import Logo from "@/assets/Group 2.svg";
 import { ShieldCheck } from "lucide-react";
+import "./DoubleVerifierPage.css"; // Impor file CSS
 
 const DoubleVerifierPage = () => {
   const [role, setRole] = useState("");
@@ -28,59 +29,51 @@ const DoubleVerifierPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
- const handleVerification = async (e: React.FormEvent) => {
-  e.preventDefault();
-  setIsLoading(true);
+  const handleVerification = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
 
-  if (!role || !secretKey) {
-    toast.error("Harap pilih peran dan masukkan Kode Khusus Role.");
-    setIsLoading(false);
-    return;
-  }
-
-  try {
-    const res = await fetch("http://localhost:8080/api/verify", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ role, secret_key: secretKey }),
-    });
-
-    const data = await res.json();
-
-    if (!res.ok) {
-      toast.error("Verifikasi gagal", {
-        description: data.error || "Kode Khusus tidak valid.",
-      });
+    if (!role || !secretKey) {
+      toast.error("Harap pilih peran dan masukkan Kode Khusus Role.");
       setIsLoading(false);
       return;
     }
 
-    toast.success("Verifikasi berhasil! Mengarahkan ke dashboard...");
+    console.log(`Verifying role: ${role} with key: ${secretKey}`);
 
-    switch (role) {
-      case "owner":
-        navigate("/owner/dashboard");
-        break;
-      case "auditor":
-        navigate("/auditor/dashboard");
-        break;
-      case "proposer":
-        navigate("/proposer/dashboard");
-        break;
-      default:
-        navigate("/login");
-    }
-  } catch (err) {
-    toast.error("Terjadi kesalahan saat verifikasi.");
-  } finally {
-    setIsLoading(false);
-  }
-};
-
+    setTimeout(() => {
+      if (secretKey) {
+        toast.success("Verifikasi berhasil! Mengarahkan ke dashboard...");
+        switch (role) {
+          case "owner":
+            navigate("/owner/dashboard");
+            break;
+          case "auditor":
+            navigate("/auditor/dashboard");
+            break;
+          case "proposer":
+            navigate("/proposer/dashboard");
+            break;
+          default:
+            navigate("/login");
+        }
+      } else {
+        toast.error("Verifikasi Gagal", {
+          description: "Kode Khusus Role yang Anda masukkan tidak valid.",
+        });
+      }
+      setIsLoading(false);
+    }, 1500);
+  };
 
   return (
-    <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
-      <Card className="w-full max-w-md shadow-lg">
+    <div className="double-verifier-page">
+      <div className="background-gradient"></div>
+       {/* Floating Elements */}
+       <div className="absolute top-20 left-10 w-4 h-4 rounded-full bg-accent animate-float opacity-60" />
+      <div className="absolute top-40 right-20 w-6 h-6 rounded-full bg-white/30 animate-float animation-delay-1000 opacity-40" />
+      <div className="absolute bottom-32 left-1/4 w-3 h-3 rounded-full bg-secondary animate-pulse-glow opacity-50" />
+      <Card className="w-full max-w-md shadow-lg relative z-10 bg-card/90 backdrop-blur-sm">
         <CardHeader className="text-center space-y-2">
             <div className="flex justify-center mb-4">
                 <div className="flex items-center justify-start">

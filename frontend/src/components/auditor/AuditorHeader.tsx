@@ -1,3 +1,4 @@
+// src/components/auditor/AuditorHeader.tsx
 import { Bell, Wallet, CheckCircle, History } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
@@ -9,7 +10,6 @@ interface AuditorHeaderProps {
     walletAddress: string;
 }
 
-// Data notifikasi sementara untuk demonstrasi
 const mockNotifications = [
   {
     id: 1,
@@ -31,7 +31,7 @@ export const AuditorHeader = ({ auditorName, walletAddress }: AuditorHeaderProps
     const [hasUnread, setHasUnread] = useState(true);
 
     const formatAddress = (address: string) => {
-        return `${address.substring(0, 6)}...${address.substring(address.length - 4)}`;
+        return `${address.substring(0, 6)}....${address.substring(address.length - 4)}`;
     };
 
     return (
@@ -41,7 +41,6 @@ export const AuditorHeader = ({ auditorName, walletAddress }: AuditorHeaderProps
                 <p className="font-semibold text-foreground">{auditorName}</p>
             </div>
             <div className="flex items-center space-x-4">
-                {/* Notifikasi Bell */}
                 <Popover onOpenChange={() => setHasUnread(false)}>
                     <PopoverTrigger asChild>
                         <Button variant="ghost" size="icon" className="relative">
@@ -93,7 +92,6 @@ export const AuditorHeader = ({ auditorName, walletAddress }: AuditorHeaderProps
                     </PopoverContent>
                 </Popover>
 
-                {/* Wallet */}
                 <div className="flex items-center space-x-2 p-2 border rounded-lg">
                     <Wallet className="h-5 w-5 text-gray-500" />
                     <span className="text-sm font-mono text-gray-700">
