@@ -1,3 +1,5 @@
+// src/components/Transparansi.tsx
+import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { ArrowLeft, MapPin, DollarSign, TrendingUp, BarChart3, Users, Briefcase } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -10,20 +12,70 @@ import ProjectCard from "@/components/ui/project-card";
 import { getDetailedProvinceById, detailedProvinces } from "@/data/detailed-provinces";
 import { provinces } from "@/data/provinces";
 import Footer from "@/components/Footer";
+import { getAllProjects,ApiProject } from "@/api/projectApi";
+import { mapApiProjectToCard } from "@/utils/projectMappers";
+
+// Buat fungsi mapper untuk data static dari detailedProvinces
+const mapStaticProjectToCard = (project: any): any => {
+  return {
+    id: project.id,
+    name: project.name || project.judul || "Nama Proyek",
+    description: project.description || project.deskripsi || "Deskripsi proyek",
+    budget: project.budget || 0,
+    image: project.image || project.gambar_url || "/placeholder-project.jpg",
+    status: project.status || "ongoing",
+    category: project.category || project.kategori || "Infrastruktur",
+    startDate: project.startDate || new Date().toLocaleDateString('id-ID'),
+    averageRating: project.averageRating || 4.2,
+    ratings: project.ratings || {
+      innovation: 4,
+      societalBenefit: 4.5,
+      transparency: 3.8,
+      executionQuality: 4.2,
+      budgetEfficiency: 3.9
+    },
+    comments: project.comments || [],
+    stages: project.stages || [
+      {
+        id: 1,
+        name: "Perencanaan",
+        progress: 100,
+        deadline: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toLocaleDateString('id-ID'),
+        status: "selesai",
+        imageUrl: project.image || project.gambar_url || "/placeholder-project.jpg",
+        date: new Date().toLocaleDateString('id-ID')
+      }
+    ]
+  };
+};
 
 const Transparansi = () => {
   const { provinceId } = useParams();
+  const [apiProjects, setApiProjects] = useState<ApiProject[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  // Jika tidak ada provinceId, tampilkan semua proyek dari semua provinsi
+  useEffect(() => {
+    const fetchProjects = async () => {
+      try {
+        setLoading(true);
+        const data = await getAllProjects();
+        setApiProjects(data);
+        setError(null);
+      } catch (err) {
+        console.error("Failed to fetch projects:", err);
+        setError("Gagal memuat data proyek. Silakan coba lagi nanti.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProjects();
+  }, []);
+
+  // Jika tidak ada provinceId, tampilkan semua proyek dari API
   if (!provinceId) {
-    // Mengumpulkan semua proyek dari semua provinsi
-    const allProjects = detailedProvinces.flatMap(p => 
-      [
-        ...(p.projects || []), 
-        ...p.citiesData.flatMap(c => c.projects || []),
-        ...p.citiesData.flatMap(c => c.districts.flatMap(d => d.projects || []))
-      ]
-    );
+    const mappedProjects = apiProjects.map(mapApiProjectToCard);
 
     return (
       <div className="min-h-screen bg-background">
@@ -38,28 +90,52 @@ const Transparansi = () => {
             </p>
           </div>
 
-          {allProjects.length > 0 ? (
-             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {allProjects.map((project) => (
-                  <ProjectCard key={project.id} project={project} />
-                ))}
+          {loading ? (
+            <div className="flex justify-center items-center h-64">
+              <div className="flex flex-col items-center space-y-4">
+                <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+                <p className="text-muted-foreground">Memuat data proyek...</p>
               </div>
-          ) : (
-             <Card className="text-center py-12">
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto">
-                      <Briefcase className="w-8 h-8 text-muted-foreground" />
-                    </div>
-                    <div>
-                      <h3 className="text-lg font-semibold text-foreground">Belum Ada Proyek</h3>
-                      <p className="text-muted-foreground">
-                        Saat ini belum ada data proyek yang tersedia untuk ditampilkan.
-                      </p>
-                    </div>
+            </div>
+          ) : error ? (
+            <Card className="text-center py-12">
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto">
+                    <Briefcase className="w-8 h-8 text-muted-foreground" />
                   </div>
-                </CardContent>
-              </Card>
+                  <div>
+                    <h3 className="text-lg font-semibold text-foreground">Terjadi Kesalahan</h3>
+                    <p className="text-muted-foreground">{error}</p>
+                  </div>
+                  <Button onClick={() => window.location.reload()} variant="outline">
+                    Coba Lagi
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          ) : mappedProjects.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {mappedProjects.map((project) => (
+                <ProjectCard key={project.id} project={project} />
+              ))}
+            </div>
+          ) : (
+            <Card className="text-center py-12">
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto">
+                    <Briefcase className="w-8 h-8 text-muted-foreground" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold text-foreground">Belum Ada Proyek</h3>
+                    <p className="text-muted-foreground">
+                      Saat ini belum ada data proyek yang tersedia untuk ditampilkan.
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           )}
         </main>
         <Footer />
@@ -96,6 +172,9 @@ const Transparansi = () => {
   const totalProjects = province.ongoingProjects + province.completedProjects;
   const completionRate = totalProjects > 0 ? (province.completedProjects / totalProjects) * 100 : 0;
   const usageRate = province.receivedFunds > 0 ? (province.usedFunds / province.receivedFunds) * 100 : 0;
+
+  // Map proyek provinsi ke format yang diharapkan (gunakan mapper untuk data static)
+  const mappedProvinceProjects = detailedProvince?.projects?.map(mapStaticProjectToCard) || [];
 
   return (
     <div className="min-h-screen bg-background">
@@ -230,7 +309,7 @@ const Transparansi = () => {
         </Card>
 
         {/* Provincial Projects */}
-        {detailedProvince && detailedProvince.projects && detailedProvince.projects.length > 0 && (
+        {mappedProvinceProjects.length > 0 && (
           <Card className="mb-8">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -240,7 +319,7 @@ const Transparansi = () => {
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-                {detailedProvince.projects.map((project) => (
+                {mappedProvinceProjects.map((project) => (
                   <ProjectCard key={project.id} project={project} />
                 ))}
               </div>
