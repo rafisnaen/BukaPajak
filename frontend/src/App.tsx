@@ -1,4 +1,4 @@
-// App.tsx
+// src/App.tsx
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -18,6 +18,7 @@ import Tentang from "./pages/Tentang";
 import ProposerDashboardPage from "./pages/proposer/DashboardPage";
 import NewProposalPage from "./pages/proposer/NewProposalPage";
 import HistoryPage from "./pages/proposer/HistoryPage";
+import UpdateProgressPage from "./pages/proposer/UpdateProgressPage"; // Impor halaman baru
 
 // --- Halaman Auditor ---
 import AuditorDashboardPage from "./pages/auditor/DashboardPage";
@@ -73,6 +74,14 @@ const App = () => (
             element={
               <ProtectedRoute>
                 <HistoryPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/proposer/update-progress"
+            element={
+              <ProtectedRoute>
+                <UpdateProgressPage />
               </ProtectedRoute>
             }
           />
