@@ -21,8 +21,12 @@ func ProjectRoutes(r *gin.Engine) {
 	api.Use(middlewares.AuthMiddleware())
 	{
 		api.POST("", projectHandler.CreateProject)
-		api.GET("", projectHandler.GetAllProjects)
-		api.GET("/:id", projectHandler.GetProjectByID)
+
+	}
+	Project := r.Group("/admin/projects")
+	{
+		Project.GET("", projectHandler.GetAllProjects)
+		Project.GET("/:id", projectHandler.GetProjectByID)
 	}
 }
 func RegionRoutes(r *gin.Engine) {

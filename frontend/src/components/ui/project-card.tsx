@@ -1,17 +1,16 @@
+// components/ui/project-card.tsx
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { Star, ThumbsUp, Calendar, DollarSign, MessageCircle, Image, CheckCircle } from "lucide-react"; // Impor CheckCircle
-import { Project } from "@/data/detailed-provinces";
+import { Star, ThumbsUp, Calendar, DollarSign, MessageCircle, Image, CheckCircle } from "lucide-react";
 import { useState } from "react";
-import CommentForm from "./comment-form";
-import { toast }  from "@/components/ui/sonner"; // Menggunakan sonner untuk toast
-import ProjectDetailsDialog from "./ProjectDetailDialog";
+import { toast } from "@/components/ui/sonner";
+import ProjectDetailsDialog, { ProjectDetail } from "./ProjectDetailDialog";
 
 interface ProjectCardProps {
-  project: Project;
+  project: ProjectDetail;
 }
 
 const ProjectCard = ({ project }: ProjectCardProps) => {
@@ -23,44 +22,44 @@ const ProjectCard = ({ project }: ProjectCardProps) => {
   };
 
   const getStatusColor = (status: string) => {
-    return status === 'completed' ? 'bg-green-500' : 'bg-blue-500';
+    return status === "completed" ? "bg-green-500" : "bg-blue-500";
   };
 
   const getStatusText = (status: string) => {
-    return status === 'completed' ? 'Selesai' : 'Berlangsung';
+    return status === "completed" ? "Selesai" : "Berlangsung";
   };
 
   const getRatingColor = (rating: number) => {
-    if (rating >= 4) return 'text-green-500';
-    if (rating >= 3) return 'text-yellow-500';
-    return 'text-red-500';
+    if (rating >= 4) return "text-green-500";
+    if (rating >= 3) return "text-yellow-500";
+    return "text-red-500";
   };
 
   const getQualityText = (rating: number) => {
-    if (rating >= 4.5) return 'Sangat Baik';
-    if (rating >= 3.5) return 'Baik';
-    if (rating >= 2.5) return 'Buruk';
-    return 'Sangat Buruk';
+    if (rating >= 4.5) return "Sangat Baik";
+    if (rating >= 3.5) return "Baik";
+    if (rating >= 2.5) return "Buruk";
+    return "Sangat Buruk";
   };
 
   const ratingCategories = [
-    { key: 'innovation', label: 'Inovasi', value: project.ratings.innovation },
-    { key: 'societalBenefit', label: 'Manfaat Masyarakat', value: project.ratings.societalBenefit },
-    { key: 'transparency', label: 'Transparansi', value: project.ratings.transparency },
-    { key: 'executionQuality', label: 'Kualitas Pelaksanaan', value: project.ratings.executionQuality },
-    { key: 'budgetEfficiency', label: 'Efisiensi Anggaran', value: project.ratings.budgetEfficiency }
+    { key: "innovation", label: "Inovasi", value: project.ratings.innovation },
+    { key: "societalBenefit", label: "Manfaat Masyarakat", value: project.ratings.societalBenefit },
+    { key: "transparency", label: "Transparansi", value: project.ratings.transparency },
+    { key: "executionQuality", label: "Kualitas Pelaksanaan", value: project.ratings.executionQuality },
+    { key: "budgetEfficiency", label: "Efisiensi Anggaran", value: project.ratings.budgetEfficiency },
   ];
 
-  const handleCommentSubmit = (commentData: any) => {
+  const handleCommentSubmit = () => {
     toast.success("Feedback Berhasil Dikirim", {
-        description: "Terima kasih atas feedback Anda terhadap proyek ini.",
-        icon: <CheckCircle className="w-4 h-4" />, // Menambahkan ikon centang
-      });
+      description: "Terima kasih atas feedback Anda terhadap proyek ini.",
+      icon: <CheckCircle className="w-4 h-4" />,
+    });
   };
 
   return (
     <>
-      <Card 
+      <Card
         className="hover:shadow-xl hover:scale-105 transition-all duration-300 border-border hover:border-primary/30 hover:shadow-primary/20 cursor-pointer group"
         onClick={() => setShowProjectDetails(true)}
       >
@@ -86,12 +85,16 @@ const ProjectCard = ({ project }: ProjectCardProps) => {
 
         <CardContent className="space-y-4">
           <div className="w-full h-48 bg-muted rounded-lg flex items-center justify-center">
-            <div className="text-center text-muted-foreground">
-              <Image className="w-12 h-12 mx-auto mb-2" />
-              <p className="text-sm">Foto Proyek</p>
-            </div>
+            {project.image ? (
+              <img src={project.image} alt={project.name} className="w-full h-48 object-cover rounded-lg" />
+            ) : (
+              <div className="text-center text-muted-foreground">
+                <Image className="w-12 h-12 mx-auto mb-2" />
+                <p className="text-sm">Foto Proyek</p>
+              </div>
+            )}
           </div>
-          
+
           <p className="text-sm text-muted-foreground line-clamp-2">{project.description}</p>
 
           <div className="grid grid-cols-2 gap-4">
@@ -111,22 +114,21 @@ const ProjectCard = ({ project }: ProjectCardProps) => {
             </div>
           </div>
 
-          <Button 
-            variant="outline" 
-            size="sm" 
+          <Button
+            variant="outline"
+            size="sm"
             onClick={(e) => {
               e.stopPropagation();
               setShowDetails(!showDetails);
             }}
             className="w-full"
           >
-            {showDetails ? 'Sembunyikan Detail' : 'Lihat Detail & Rating'}
+            {showDetails ? "Sembunyikan Detail" : "Lihat Detail & Rating"}
           </Button>
 
           {showDetails && (
             <>
               <Separator />
-              
               <div className="space-y-3">
                 <h4 className="font-medium text-foreground">Penilaian Kategori</h4>
                 {ratingCategories.map((category) => (
@@ -144,67 +146,11 @@ const ProjectCard = ({ project }: ProjectCardProps) => {
                   </div>
                 ))}
               </div>
-
-              <Separator />
-
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <h4 className="font-medium text-foreground">Komentar Masyarakat</h4>
-                  <Badge variant="secondary">
-                    <MessageCircle className="w-3 h-3 mr-1" />
-                    {project.comments.length}
-                  </Badge>
-                </div>
-                
-                {project.comments.slice(0, 2).map((comment) => (
-                  <div key={comment.id} className="bg-muted/50 rounded-lg p-3 space-y-2">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <div className="w-6 h-6 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-xs">
-                          {comment.userAvatar}
-                        </div>
-                        <span className="text-sm font-medium">{comment.userName}</span>
-                        <div className="flex items-center gap-1">
-                          {Array.from({ length: 5 }).map((_, i) => (
-                            <Star
-                              key={i}
-                              className={`w-3 h-3 ${
-                                i < comment.rating ? 'text-yellow-400 fill-current' : 'text-muted-foreground'
-                              }`}
-                            />
-                          ))}
-                        </div>
-                      </div>
-                      <span className="text-xs text-muted-foreground">{comment.date}</span>
-                    </div>
-                    <p className="text-sm text-foreground">{comment.content}</p>
-                    <div className="flex items-center gap-1 text-muted-foreground">
-                      <ThumbsUp className="w-3 h-3" />
-                      <span className="text-xs">{comment.likes} suka</span>
-                    </div>
-                  </div>
-                ))}
-                
-                {project.comments.length > 2 && (
-                  <Button variant="ghost" size="sm" className="w-full">
-                    Lihat Semua Komentar ({project.comments.length})
-                  </Button>
-                )}
-                
-                <CommentForm 
-                  projectId={project.id} 
-                  onSubmit={handleCommentSubmit}
-                />
-              </div>
             </>
           )}
         </CardContent>
       </Card>
-      <ProjectDetailsDialog 
-        project={project} 
-        open={showProjectDetails} 
-        onOpenChange={setShowProjectDetails} 
-      />
+      <ProjectDetailsDialog project={project} open={showProjectDetails} onOpenChange={setShowProjectDetails} />
     </>
   );
 };
