@@ -51,12 +51,6 @@ const ProvinceCard = ({
           <CardTitle className="text-lg font-semibold text-foreground">
             {name || "Tanpa Nama"}
           </CardTitle>
-          <div className="flex items-center space-x-1 text-muted-foreground">
-            <MapPin className="w-4 h-4" />
-            <span className="text-sm">
-              {population?.toLocaleString?.() ?? "0"}
-            </span>
-          </div>
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
