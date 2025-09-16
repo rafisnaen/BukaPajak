@@ -18,7 +18,7 @@ const transformApiDataToProvince = (apiData: ApiProvince): Province => ({
 
 export const getRegions = async (): Promise<Province[]> => {
   try {
-    const res = await fetch(`${API_BASE_URL}/admin/region`);
+    const res = await fetch(`${API_BASE_URL}/api/v1/regions`);
     
     if (!res.ok) {
       throw new Error(`Failed to fetch regions: ${res.status} ${res.statusText}`);
