@@ -1,5 +1,6 @@
 package schemas
 
+// Region biasanya dikirim pakai JSON
 type CreateRegionRequest struct {
 	NamaRegion     string  `json:"nama_region" binding:"required"`
 	DanaDiterima   float64 `json:"dana_diterima"`
