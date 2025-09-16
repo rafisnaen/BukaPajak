@@ -86,7 +86,7 @@ func SmartContract(router *gin.Engine) {
 		api.GET("/proposals/pending", handlers.GetPendingProposalsHandler)
 		api.GET("/proposals/status/:status", handlers.GetProposalsByStatusHandler)
 		api.GET("/proposals/user/:address", handlers.GetUserProposalsHandler)
-		api.GET("/proposals/:id", handlers.GetProposalHandler)
+		// api.GET("/proposals/:id", handlers.GetProposalHandler)
 		api.POST("/proposals/:id/approve", handlers.ApproveProposalHandler)
 		api.POST("/proposals/:id/reject", handlers.RejectProposalHandler)
 
@@ -120,6 +120,7 @@ func ProposalRoutes(r *gin.Engine) {
 		api.POST("/proposals/upload", handlers.UploadProposalHandler) // Use the wrapper handler
 		api.GET("/proposals", handlers.GetAllProposalsHandler)
 		api.GET("/proposals/me", handlers.GetUserProposalsHandler)
-		api.GET("", handlers.CheckConfigHandler)
+		api.GET("/proposals/:id", handlers.GetProposalByIDHandler) // ✅ baru
+
 	}
 }
