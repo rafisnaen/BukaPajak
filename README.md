@@ -7,7 +7,7 @@ Panduan ini menjelaskan cara instalasi, setup dependencies, dan menjalankan apli
 Pastikan software berikut sudah terinstal dengan baik:
 
 - **Node.js** versi >= 18, Link =  [🤩Node.js](https://nodejs.org/)
-- **npm** versi >= 9, Link = [🔨npm](https://www.npmjs.com/) >= 9
+- **npm** versi >= 9, Link = [🔨npm](https://www.npmjs.com/)
 - **Go** versi >= 1.25, Link = [💙Go](https://go.dev/dl/)
 - **Metamask** browser extension, Link = [🦊Metamask](https://metamask.io/download/)
 
