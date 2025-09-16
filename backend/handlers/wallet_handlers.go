@@ -88,7 +88,8 @@ func VerifyWallet(c *gin.Context) {
 	}
 
 	// GENERATE JWT TOKEN using your existing utility
-	token, err := utils.GenerateJWT(req.Email)
+	// In VerifyWallet
+	token, err := utils.GenerateJWT(req.Address, req.Email)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to generate token"})
 		return

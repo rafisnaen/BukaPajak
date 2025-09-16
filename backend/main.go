@@ -14,7 +14,8 @@ import (
 func main() {
 	// Connect to Supabase
 	if err := configs.ConnectSupaBase(); err != nil {
-		log.Fatalf("Failed to connect to Supabase: %v", err)
+		log.Printf("⚠️  Supabase connection issues: %v", err)
+		log.Printf("⚠️  Some features may be limited, but starting server anyway...")
 	}
 
 	// Connect to Ethereum (but don't crash if it fails)
@@ -50,12 +51,16 @@ func main() {
 	routes.SmartContract(r)
 	routes.WalletRoutes(r)
 	routes.RegionRoutes(r)
+	routes.ProposalRoutes(r)
+
 	// Health check endpoint
 	r.GET("/", func(c *gin.Context) {
 		c.JSON(200, gin.H{
 			"message":            "Backend server is running",
 			"status":             "healthy",
 			"ethereum_connected": ethErr == nil,
+			"supabase_connected": configs.Supabase != nil,
+			"storage_connected":  configs.Storage != nil,
 		})
 	})
 

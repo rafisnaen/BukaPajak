@@ -214,28 +214,28 @@ func GetProposalsByStatusHandler(c *gin.Context) {
 	})
 }
 
-func GetUserProposalsHandler(c *gin.Context) {
-	address := c.Param("address")
+// func GetUserProposalsHandler(c *gin.Context) {
+// 	address := c.Param("address")
 
-	if !common.IsHexAddress(address) {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid Ethereum address"})
-		return
-	}
+// 	if !common.IsHexAddress(address) {
+// 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid Ethereum address"})
+// 		return
+// 	}
 
-	userAddress := common.HexToAddress(address)
+// 	userAddress := common.HexToAddress(address)
 
-	proposals, err := repositories.GetUserProposals(userAddress)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to get user proposals: " + err.Error()})
-		return
-	}
+// 	proposals, err := repositories.GetUserProposals(userAddress)
+// 	if err != nil {
+// 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to get user proposals: " + err.Error()})
+// 		return
+// 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"proposals": proposals,
-		"count":     len(proposals),
-		"user":      address,
-	})
-}
+// 	c.JSON(http.StatusOK, gin.H{
+// 		"proposals": proposals,
+// 		"count":     len(proposals),
+// 		"user":      address,
+// 	})
+//}
 
 func DepositHandler(c *gin.Context) {
 	var req struct {
