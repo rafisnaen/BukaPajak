@@ -13,12 +13,13 @@ import DashboardPage from "./pages/DashboardPage";
 import Regional from "./pages/Regional";
 import Transparansi from "./pages/Transparansi";
 import Tentang from "./pages/Tentang";
+import DoubleVerifierPage from "./pages/DoubleVerifierPage"; // Impor halaman baru
 
 // --- Halaman Pengusul ---
 import ProposerDashboardPage from "./pages/proposer/DashboardPage";
 import NewProposalPage from "./pages/proposer/NewProposalPage";
 import HistoryPage from "./pages/proposer/HistoryPage";
-import UpdateProgressPage from "./pages/proposer/UpdateProgressPage"; // Impor halaman baru
+import UpdateProgressPage from "./pages/proposer/UpdateProgressPage";
 
 // --- Halaman Auditor ---
 import AuditorDashboardPage from "./pages/auditor/DashboardPage";
@@ -51,6 +52,16 @@ const App = () => (
           <Route path="/transparansi/:provinceId" element={<Transparansi />} />
           <Route path="/transparansi" element={<Transparansi />} />
           <Route path="/tentang" element={<Tentang />} />
+
+          {/* --- Rute Verifikasi (Protected) --- */}
+          <Route
+            path="/verify-role"
+            element={
+              <ProtectedRoute>
+                <DoubleVerifierPage />
+              </ProtectedRoute>
+            }
+          />
 
           {/* --- Rute Khusus Pengusul (Protected) --- */}
           <Route
