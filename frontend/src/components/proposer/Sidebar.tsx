@@ -1,3 +1,5 @@
+// src/components/proposer/Sidebar.tsx
+
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard,
@@ -25,7 +27,7 @@ export const Sidebar = () => {
   };
 
   return (
-    <aside className="w-64 bg-blue-800 text-white flex flex-col">
+    <aside className="w-64 bg-blue-800 text-white flex flex-col fixed h-screen">
         <div className="flex items-center space-x-3 p-2">
             <div className="bg-blue-600 rounded-lg h-10 w-10 relative">
                 <img 

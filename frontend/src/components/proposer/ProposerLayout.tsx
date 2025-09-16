@@ -1,3 +1,5 @@
+// src/components/proposer/ProposerLayout.tsx
+
 import { Sidebar } from "./Sidebar";
 import { ProposerHeader } from "./ProposerHeader";
 import { ReactNode } from "react";
@@ -14,11 +16,11 @@ interface ProposerLayoutProps {
     const proposerName = "Dinas PU DKI Jakarta"; // Data nama sementara
 
     return (
-        <div className="min-h-screen bg-gray-100 flex">
+        <div className="min-h-screen bg-gray-100">
         <Sidebar />
-        <div className="flex-1 flex flex-col">
+        <div className="ml-64 flex flex-col h-screen">
             <ProposerHeader walletAddress={walletAddress} proposerName={proposerName} />
-            <main className="p-6 lg:p-8 flex-grow">
+            <main className="p-6 lg:p-8 flex-grow overflow-y-auto" style={{ overscrollBehaviorY: 'none' }}>
             {children}
             </main>
         </div>

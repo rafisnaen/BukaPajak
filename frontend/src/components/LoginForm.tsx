@@ -295,7 +295,7 @@ export const LoginForm = () => {
                   <Separator className="w-full" />
                 </div>
                 <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-card px-2 text-muted-foreground">Atau</span>
+                  <span className="bg-card px-2 text-muted-foreground">Dan</span>
                 </div>
               </div>
 
