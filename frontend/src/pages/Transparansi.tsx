@@ -1,5 +1,5 @@
 import { useParams, Link } from "react-router-dom";
-import { ArrowLeft, MapPin, DollarSign, TrendingUp, BarChart3, Users } from "lucide-react";
+import { ArrowLeft, MapPin, DollarSign, TrendingUp, BarChart3, Users, Briefcase } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -7,42 +7,67 @@ import { Progress } from "@/components/ui/progress";
 import Header from "@/components/Header";
 import AdministrativeLevel from "@/components/ui/administrative-level";
 import ProjectCard from "@/components/ui/project-card";
-import { getDetailedProvinceById } from "@/data/detailed-provinces";
+import { getDetailedProvinceById, detailedProvinces } from "@/data/detailed-provinces";
 import { provinces } from "@/data/provinces";
 
 const Transparansi = () => {
   const { provinceId } = useParams();
-  
-  // If no provinceId, show the map
+
+  // Jika tidak ada provinceId, tampilkan semua proyek dari semua provinsi
   if (!provinceId) {
+    // Mengumpulkan semua proyek dari semua provinsi
+    const allProjects = detailedProvinces.flatMap(p => 
+      [
+        ...(p.projects || []), 
+        ...p.citiesData.flatMap(c => c.projects || []),
+        ...p.citiesData.flatMap(c => c.districts.flatMap(d => d.projects || []))
+      ]
+    );
+
     return (
       <div className="min-h-screen bg-background">
-      <Header />
+        <Header />
+        <main className="container mx-auto px-4 pt-24 pb-8">
+          <div className="flex flex-col items-center justify-center text-center space-y-4 mb-12">
+            <h1 className="text-4xl font-bold text-foreground">
+              Semua Proyek Pembangunan
+            </h1>
+            <p className="text-muted-foreground max-w-2xl">
+              Berikut adalah daftar semua proyek pembangunan yang terdaftar di platform kami dari berbagai daerah di seluruh Indonesia.
+            </p>
+          </div>
 
-      <main className="container mx-auto px-4 pt-24 pb-8">
-        <div className="flex flex-col items-center justify-center text-center space-y-6">
-          <h1 className="text-2xl font-bold text-foreground">
-            Fitur Transparansi Sedang Dikembangkan
-          </h1>
-          <p className="text-muted-foreground max-w-md">
-            Map overview dan detail transparansi sedang dalam tahap penyempurnaan. 
-            Untuk sementara, silakan akses daftar provinsi melalui tombol di bawah ini.
-          </p>
-          <Link to="/regional">
-            <Button variant="outline">
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Kembali ke Regional
-            </Button>
-          </Link>
-        </div>
-      </main>
-    </div>
+          {allProjects.length > 0 ? (
+             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {allProjects.map((project) => (
+                  <ProjectCard key={project.id} project={project} />
+                ))}
+              </div>
+          ) : (
+             <Card className="text-center py-12">
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto">
+                      <Briefcase className="w-8 h-8 text-muted-foreground" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-semibold text-foreground">Belum Ada Proyek</h3>
+                      <p className="text-muted-foreground">
+                        Saat ini belum ada data proyek yang tersedia untuk ditampilkan.
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+          )}
+        </main>
+      </div>
     );
   }
-  
+
   // Get basic province data
   const province = provinces.find(p => p.id === provinceId);
-  
+
   // Get detailed province data
   const detailedProvince = getDetailedProvinceById(provinceId || "");
 

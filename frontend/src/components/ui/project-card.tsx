@@ -3,11 +3,11 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { Star, ThumbsUp, Calendar, DollarSign, MessageCircle, Image } from "lucide-react";
+import { Star, ThumbsUp, Calendar, DollarSign, MessageCircle, Image, CheckCircle } from "lucide-react"; // Impor CheckCircle
 import { Project } from "@/data/detailed-provinces";
 import { useState } from "react";
 import CommentForm from "./comment-form";
-import { useToast }  from "@/hooks/use-toast";
+import { toast }  from "@/components/ui/sonner"; // Menggunakan sonner untuk toast
 import ProjectDetailsDialog from "./ProjectDetailDialog";
 
 interface ProjectCardProps {
@@ -17,7 +17,6 @@ interface ProjectCardProps {
 const ProjectCard = ({ project }: ProjectCardProps) => {
   const [showDetails, setShowDetails] = useState(false);
   const [showProjectDetails, setShowProjectDetails] = useState(false);
-  const { toast } = useToast();
 
   const formatCurrency = (amount: number) => {
     return `Rp ${(amount / 1000000000).toFixed(1)}M`;
@@ -53,10 +52,10 @@ const ProjectCard = ({ project }: ProjectCardProps) => {
   ];
 
   const handleCommentSubmit = (commentData: any) => {
-    toast({
-      title: "Feedback Berhasil Dikirim",
-      description: "Terima kasih atas feedback Anda terhadap proyek ini.",
-    });
+    toast.success("Feedback Berhasil Dikirim", {
+        description: "Terima kasih atas feedback Anda terhadap proyek ini.",
+        icon: <CheckCircle className="w-4 h-4" />, // Menambahkan ikon centang
+      });
   };
 
   return (
@@ -211,4 +210,3 @@ const ProjectCard = ({ project }: ProjectCardProps) => {
 };
 
 export default ProjectCard;
-

@@ -7,10 +7,10 @@ import {
     DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useState } from "react";
-import { Send, Loader2 } from "lucide-react";
+import { Send, Loader2, Info } from "lucide-react";
+import { toast } from "sonner";
 
 interface FundReleaseModalProps {
     isOpen: boolean;
@@ -19,29 +19,26 @@ interface FundReleaseModalProps {
         id: string;
         title: string;
         amount: number;
+        recipientAddress: string;
     };
 }
 
 export const FundReleaseModal = ({ isOpen, onClose, proposal }: FundReleaseModalProps) => {
-    const [recipientAddress, setRecipientAddress] = useState("");
     const [isLoading, setIsLoading] = useState(false);
 
     const handleReleaseFunds = () => {
-        // Validasi alamat Ethereum sederhana
-        if (!/^0x[a-fA-F0-9]{40}$/.test(recipientAddress)) {
-            alert("Harap masukkan alamat wallet Ethereum yang valid.");
-            return;
-        }
-        
         setIsLoading(true);
-        console.log(`Mencairkan ${proposal.amount} ETH untuk proposal #${proposal.id} ke alamat: ${recipientAddress}`);
+        console.log(`Mencairkan ${proposal.amount} ETH untuk proposal #${proposal.id} ke alamat: ${proposal.recipientAddress}`);
         
         // TODO: Panggil API backend untuk memicu transaksi 'releaseFunds'
         // Pemicuan MetaMask akan terjadi di sini
         
         // Simulasi
         setTimeout(() => {
-            alert("Dana berhasil dicairkan! (Simulasi)");
+            toast.success("Dana Berhasil Dicairkan!", {
+              description: `Dana sebesar ${proposal.amount} ETH telah dikirim ke alamat penerima.`,
+              duration: 5000,
+            });
             setIsLoading(false);
             onClose();
         }, 2000);
@@ -62,15 +59,16 @@ export const FundReleaseModal = ({ isOpen, onClose, proposal }: FundReleaseModal
                         <p className="text-2xl font-bold text-blue-900">{proposal.amount.toFixed(2)} ETH</p>
                     </div>
                     <div className="space-y-2">
-                        <Label htmlFor="recipient-address" className="font-semibold">
-                            Alamat Wallet Penerima (Kontraktor)
+                        <Label className="font-semibold">
+                            Alamat Wallet Penerima (Otomatis)
                         </Label>
-                        <Input 
-                            id="recipient-address"
-                            placeholder="0x..."
-                            value={recipientAddress}
-                            onChange={(e) => setRecipientAddress(e.target.value)}
-                        />
+                        <div className="p-3 bg-slate-100 rounded-md text-center">
+                            <code className="text-sm font-mono">{proposal.recipientAddress}</code>
+                        </div>
+                        <div className="flex items-center text-xs text-muted-foreground p-2 bg-slate-50 rounded-md">
+                            <Info className="h-4 w-4 mr-2 flex-shrink-0" />
+                            <span>Alamat ini diambil otomatis dari data proposal yang diajukan untuk menjamin keamanan.</span>
+                        </div>
                     </div>
                 </div>
                 <DialogFooter>

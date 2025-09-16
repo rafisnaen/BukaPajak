@@ -1,3 +1,5 @@
+// src/components/owner/ProposalsToFundTable.tsx
+
 import { useState } from "react";
 import {
     Table,
@@ -13,8 +15,8 @@ import { FundReleaseModal } from "./FundReleaseModal";
 
 // Data ini nantinya akan diambil dari API/backend, hanya proposal dengan status APPROVED
 const mockProposalsToFund = [
-    { id: '2', title: 'Perbaikan Jalan Utama Rawa Belong', amount: 15, approvedDate: '5/9/2025', auditor: 'Budi (BPK)' },
-    { id: '7', title: 'Beasiswa Pendidikan Dokter', amount: 50, approvedDate: '13/9/2025', auditor: 'Budi (BPK)' },
+    { id: '2', title: 'Perbaikan Jalan Utama Rawa Belong', amount: 15, approvedDate: '5/9/2025', auditor: 'Budi (BPK)', recipientAddress: '0x3B921248c937D100d566Cf78d115eb9612bc7d14' },
+    { id: '7', title: 'Beasiswa Pendidikan Dokter', amount: 50, approvedDate: '13/9/2025', auditor: 'Budi (BPK)', recipientAddress: '0x8A1fB2c3d4E5F6a7b8C9d0e1f2a3b4c5d6e7f8d9' },
 ];
 
 export const ProposalsToFundTable = () => {
