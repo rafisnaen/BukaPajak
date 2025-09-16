@@ -52,6 +52,7 @@ func main() {
 	routes.WalletRoutes(r)
 	routes.RegionRoutes(r)
 	routes.ProposalRoutes(r)
+	routes.VerifikasiRoute(r)
 
 	// Health check endpoint
 	r.GET("/", func(c *gin.Context) {

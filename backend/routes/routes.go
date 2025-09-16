@@ -120,3 +120,9 @@ func ProposalRoutes(r *gin.Engine) {
 
 	}
 }
+
+func VerifikasiRoute(r *gin.Engine) {
+	api := r.Group("/api")
+	api.POST("/verify", handlers.VerifySecretKey)
+
+}
