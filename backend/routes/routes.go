@@ -11,7 +11,6 @@ import (
 func AuthRoutes(r *gin.Engine) {
 	r.POST("/register", handlers.Register)
 	r.POST("/login", handlers.Login)
-
 }
 
 func ProjectRoutes(r *gin.Engine) {
@@ -84,13 +83,12 @@ func SmartContract(router *gin.Engine) {
 	api := router.Group("/api/v1")
 	{
 		// Proposal endpoints
-		api.POST("/proposals", handlers.SubmitProposalHandler)
-		api.GET("/proposals/pending", handlers.GetPendingProposalsHandler)
-		api.GET("/proposals/status/:status", handlers.GetProposalsByStatusHandler)
-		api.GET("/proposals/user/:address", handlers.GetUserProposalsHandler)
-		// api.GET("/proposals/:id", handlers.GetProposalHandler)
-		api.POST("/proposals/:id/approve", handlers.ApproveProposalHandler)
-		api.POST("/proposals/:id/reject", handlers.RejectProposalHandler)
+		api.POST("/proposals_sc", handlers.SubmitProposalHandler) // Renamed to avoid conflict
+		api.GET("/proposals_sc/pending", handlers.GetPendingProposalsHandler)
+		api.GET("/proposals_sc/status/:status", handlers.GetProposalsByStatusHandler)
+		// api.GET("/proposals_sc/user/:address", handlers.GetUserProposalsHandler) // This is now handled by /proposals/me
+		api.POST("/proposals_sc/:id/approve", handlers.ApproveProposalHandler)
+		api.POST("/proposals_sc/:id/reject", handlers.RejectProposalHandler)
 
 		// Fund management endpoints
 		api.POST("/deposit", handlers.DepositHandler)
@@ -107,24 +105,28 @@ func WalletRoutes(r *gin.Engine) {
 
 	api.GET("/wallet/nonce", handlers.GenerateNonce)
 	api.POST("/wallet/verify", handlers.VerifyWallet)
-
 }
 
 func ProposalRoutes(r *gin.Engine) {
 	api := r.Group("/api/v1")
+	// Semua rute di grup ini memerlukan autentikasi
 	api.Use(middlewares.AuthMiddleware())
 	{
-		api.POST("/proposals/upload", handlers.UploadProposalHandler)
-		api.POST("/proposals/full", handlers.UploadProposalAndProjectHandler) // ✅ baru
-		api.GET("/proposals", handlers.GetAllProposalsHandler)
-		api.GET("/proposals/me", handlers.GetUserProposalsHandler)
-		api.GET("/proposals/:id", handlers.GetProposalByIDHandler)
+		// Rute untuk membuat project + proposal sekaligus
+		api.POST("/proposals/full", handlers.UploadProposalAndProjectHandler)
 
+		// Rute untuk mendapatkan semua proposal (mungkin untuk admin/auditor)
+		api.GET("/proposals", handlers.GetAllProposalsHandler)
+
+		// Rute untuk mendapatkan proposal milik user yang sedang login
+		api.GET("/proposals/me", handlers.GetUserProposalsHandler)
+
+		// Rute untuk mendapatkan detail proposal berdasarkan ID
+		api.GET("/proposals/:id", handlers.GetProposalByIDHandler)
 	}
 }
 
 func VerifikasiRoute(r *gin.Engine) {
 	api := r.Group("/api")
 	api.POST("/verify", handlers.VerifySecretKey)
-
 }

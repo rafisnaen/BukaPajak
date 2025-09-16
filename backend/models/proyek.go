@@ -12,4 +12,7 @@ type Proyek struct {
 	RegionID  *int64     `json:"region_id,omitempty"`
 	Status    string     `json:"status,omitempty"`
 	Kategori  string     `json:"kategori,omitempty"`
+	Alamat    string     `json:"alamat,omitempty"`
+	// 👇 TAMBAHKAN BARIS INI
+	UserID int64 `json:"user_id"`
 }

@@ -30,6 +30,7 @@ import { toast } from "sonner";
 import { ProposerLayout } from "../../components/proposer/ProposerLayout";
 import { cn } from "@/lib/utils";
 import { uploadProposalAndProject, getAllRegions, validateFile } from "@/api/proposal";
+import { getAllProjects, ApiProject } from "@/api/projectApi"; // Import project API
 
 const STEPS = [
   { id: 1, title: "Detail Proposal" },
@@ -49,12 +50,15 @@ export default function UploadProposal() {
   const [currentStep, setCurrentStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [provinces, setProvinces] = useState<Region[]>([]);
+  const [projects, setProjects] = useState<ApiProject[]>([]); // State for projects
+  const [selectedProject, setSelectedProject] = useState<string>(""); // State for selected project
   const [isLoadingProvinces, setIsLoadingProvinces] = useState(true);
   
   const [formData, setFormData] = useState({
     projectName: "",
     ethAmount: "",
     regionId: "",
+    address: "",
     category: "",
     description: "",
   });
@@ -87,6 +91,24 @@ export default function UploadProposal() {
 
     loadProvinces();
   }, []);
+
+  // Fetch Projects for Step 2
+  useEffect(() => {
+    if (currentStep === 2) {
+      const fetchProjects = async () => {
+        try {
+          const projectData = await getAllProjects();
+          // Filter projects based on the project name from step 1
+          const filteredProjects = projectData.filter(p => p.judul.toLowerCase() === formData.projectName.toLowerCase());
+          setProjects(filteredProjects);
+        } catch (error) {
+          console.error("Error fetching projects:", error);
+          toast.error("Gagal memuat data proyek");
+        }
+      };
+      fetchProjects();
+    }
+  }, [currentStep, formData.projectName]);
 
   // Fetch ETH to IDR rate
   useEffect(() => {
@@ -206,6 +228,10 @@ export default function UploadProposal() {
       errors.regionId = "Provinsi wajib dipilih";
     }
 
+    if (!formData.address.trim()) {
+      errors.address = "Alamat wajib diisi";
+    }
+
     if (!formData.category) {
       errors.category = "Kategori proyek wajib dipilih";
     }
@@ -227,6 +253,10 @@ export default function UploadProposal() {
 
     if (!documentFile) {
       errors.document = "File proposal wajib diupload";
+    }
+    
+    if (!selectedProject) {
+      errors.project = "Proyek yang diajukan wajib dipilih";
     }
 
     setValidationErrors(errors);
@@ -256,7 +286,7 @@ export default function UploadProposal() {
     e.preventDefault();
     
     if (!validateStep2()) {
-      toast.error("Harap upload file proposal");
+      toast.error("Harap upload file proposal dan pilih proyek yang diajukan.");
       return;
     }
 
@@ -276,6 +306,7 @@ export default function UploadProposal() {
       submitFormData.append("kategori", formData.category);
       submitFormData.append("deskripsi", formData.description.trim());
       submitFormData.append("budget", formData.ethAmount);
+      submitFormData.append("alamat", formData.address.trim());
       
       // Region ID
       if (formData.regionId) {
@@ -285,6 +316,8 @@ export default function UploadProposal() {
       // Files
       submitFormData.append("gambar", imageFile);
       submitFormData.append("proposal", documentFile);
+      // Selected Project ID
+      submitFormData.append("project_id", selectedProject);
 
       console.log("Submitting form data:");
       for (let pair of submitFormData.entries()) {
@@ -319,6 +352,7 @@ export default function UploadProposal() {
       projectName: "",
       ethAmount: "",
       regionId: "",
+      address: "",
       category: "",
       description: "",
     });
@@ -328,6 +362,7 @@ export default function UploadProposal() {
     setIdrValue("");
     setValidationErrors({});
     setCurrentStep(1);
+    setSelectedProject("");
   };
 
   const renderValidationError = (field: string) => {
@@ -487,6 +522,20 @@ export default function UploadProposal() {
                     </Select>
                     {renderValidationError("regionId")}
                   </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="address">
+                      Alamat <span className="text-red-500">*</span>
+                    </Label>
+                    <Input 
+                      id="address" 
+                      placeholder="Masukkan alamat lengkap proyek" 
+                      value={formData.address} 
+                      onChange={(e) => handleInputChange("address", e.target.value)} 
+                      className={validationErrors.address ? "border-red-500" : ""}
+                    />
+                    {renderValidationError("address")}
+                  </div>
                   
                   <div className="space-y-2">
                     <Label htmlFor="description">
@@ -542,45 +591,76 @@ export default function UploadProposal() {
 
               {/* Step 2: PDF Upload */}
               {currentStep === 2 && (
-                <div className="space-y-2">
-                  <Label>
-                    Dokumen Proposal (PDF) <span className="text-red-500">*</span>
-                  </Label>
-                  <Input 
-                    id="document-upload" 
-                    type="file" 
-                    ref={documentInputRef} 
-                    onChange={(e) => handleFileChange(e, "document")} 
-                    accept=".pdf" 
-                    className="hidden" 
-                  />
-                  <div 
-                    onClick={() => documentInputRef.current?.click()} 
-                    className={cn(
-                      "border-2 border-dashed rounded-lg p-12 text-center bg-muted/30 hover:bg-muted/50 cursor-pointer transition-colors",
-                      validationErrors.document ? "border-red-500" : "border-border"
-                    )}
-                  >
-                    {documentFile ? (
-                      <div className="text-green-600 flex flex-col items-center gap-2">
-                        <CheckCircle className="h-10 w-10" />
-                        <p className="text-sm font-semibold">{documentFile.name}</p>
-                        <span className="text-xs text-muted-foreground">
-                          {(documentFile.size / (1024 * 1024)).toFixed(2)} MB
-                        </span>
-                        <span className="text-xs text-muted-foreground">Klik untuk ganti file</span>
-                      </div>
-                    ) : (
-                      <div className="flex flex-col items-center gap-2">
-                        <Upload className="h-10 w-10 text-muted-foreground" />
-                        <p className="text-sm font-medium">Pilih atau seret file PDF ke sini</p>
-                        <span className="text-xs text-muted-foreground">Maksimal 10MB</span>
-                      </div>
-                    )}
+                <>
+                  <div className="space-y-2">
+                    <Label htmlFor="project-select">
+                      Proyek yang ingin diajukan <span className="text-red-500">*</span>
+                    </Label>
+                    <Select 
+                      value={selectedProject} 
+                      onValueChange={setSelectedProject}
+                    >
+                      <SelectTrigger className={validationErrors.project ? "border-red-500" : ""}>
+                        <SelectValue placeholder="Pilih proyek yang akan diajukan" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {projects.length > 0 ? (
+                          projects.map((project) => (
+                            <SelectItem key={project.id} value={project.id.toString()}>
+                              {project.judul}
+                            </SelectItem>
+                          ))
+                        ) : (
+                          <div className="px-2 py-1.5 text-sm text-muted-foreground">
+                            Tidak ada proyek yang sesuai.
+                          </div>
+                        )}
+                      </SelectContent>
+                    </Select>
+                    {renderValidationError("project")}
                   </div>
-                  {renderValidationError("document")}
-                </div>
+
+                  <div className="space-y-2">
+                    <Label>
+                      Dokumen Proposal (PDF) <span className="text-red-500">*</span>
+                    </Label>
+                    <Input 
+                      id="document-upload" 
+                      type="file" 
+                      ref={documentInputRef} 
+                      onChange={(e) => handleFileChange(e, "document")} 
+                      accept=".pdf" 
+                      className="hidden" 
+                    />
+                    <div 
+                      onClick={() => documentInputRef.current?.click()} 
+                      className={cn(
+                        "border-2 border-dashed rounded-lg p-12 text-center bg-muted/30 hover:bg-muted/50 cursor-pointer transition-colors",
+                        validationErrors.document ? "border-red-500" : "border-border"
+                      )}
+                    >
+                      {documentFile ? (
+                        <div className="text-green-600 flex flex-col items-center gap-2">
+                          <CheckCircle className="h-10 w-10" />
+                          <p className="text-sm font-semibold">{documentFile.name}</p>
+                          <span className="text-xs text-muted-foreground">
+                            {(documentFile.size / (1024 * 1024)).toFixed(2)} MB
+                          </span>
+                          <span className="text-xs text-muted-foreground">Klik untuk ganti file</span>
+                        </div>
+                      ) : (
+                        <div className="flex flex-col items-center gap-2">
+                          <Upload className="h-10 w-10 text-muted-foreground" />
+                          <p className="text-sm font-medium">Pilih atau seret file PDF ke sini</p>
+                          <span className="text-xs text-muted-foreground">Maksimal 10MB</span>
+                        </div>
+                      )}
+                    </div>
+                    {renderValidationError("document")}
+                  </div>
+                </>
               )}
+
 
               {/* Step 3: Confirmation */}
               {currentStep === 3 && (

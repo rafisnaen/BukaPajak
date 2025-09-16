@@ -1,3 +1,5 @@
+// backend/handlers/proposal_handlers.go
+
 package handlers
 
 import (
@@ -17,127 +19,10 @@ import (
 	storage_go "github.com/supabase-community/storage-go"
 )
 
-// ✅ Upload file helper
-// ✅ Upload file helper yang diperbaiki
-
-// ✅ Upload proposal handler
-func UploadProposalHandler(c *gin.Context) {
-	if !configs.IsStorageEnabled() {
-		c.JSON(http.StatusServiceUnavailable, gin.H{
-			"error":   "File upload service temporarily unavailable",
-			"details": "Storage service is not configured or connected",
-		})
-		return
-	}
-
-	// ✅ ambil userId dari token
-	userIDRaw, exists := c.Get("userId")
-	if !exists {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "User ID not found in token"})
-		return
-	}
-
-	userIDStr, ok := userIDRaw.(string)
-	if !ok {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid user ID format"})
-		return
-	}
-
-	userID, err := strconv.ParseInt(userIDStr, 10, 64)
-	if err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Failed to parse user ID"})
-		return
-	}
-
-	// ✅ ambil file dari form-data
-	file, err := c.FormFile("file")
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "File is required"})
-		return
-	}
-
-	// upload ke Supabase Storage
-	publicURL, err := UploadFileToSupabase(file)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"error":   "Upload failed",
-			"details": err.Error(),
-		})
-		return
-	}
-
-	// simpan ke database
-	proposal := models.Proposal{
-		UserID:         userID,
-		FileURL:        publicURL,
-		StatusProposal: "menunggu", // ✅ enum sesuai schema
-	}
-
-	created, err := repositories.InsertProposal(proposal)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"error":   "Failed to save proposal",
-			"details": err.Error(),
-		})
-		return
-	}
-
-	c.JSON(http.StatusOK, gin.H{
-		"message":  "Proposal uploaded successfully",
-		"proposal": created,
-	})
-}
-
-// ✅ Get all proposals
-func GetAllProposalsHandler(c *gin.Context) {
-	proposals, err := repositories.GetAllProposals()
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch proposals"})
-		return
-	}
-
-	c.JSON(http.StatusOK, gin.H{"proposals": proposals})
-}
-
-// ✅ Get proposals by current logged-in user
-func GetUserProposalsHandler(c *gin.Context) {
-	userIDRaw, exists := c.Get("userId")
-	if !exists {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "User ID not found in token"})
-		return
-	}
-	userID := userIDRaw.(int)
-
-	proposals, err := repositories.GetProposalsByUser(int64(userID))
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch user proposals"})
-		return
-	}
-
-	c.JSON(http.StatusOK, gin.H{"proposals": proposals})
-}
-
-// ✅ Get proposal by ID
-func GetProposalByIDHandler(c *gin.Context) {
-	idStr := c.Param("id")
-	id, err := strconv.ParseInt(idStr, 10, 64)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid proposal ID"})
-		return
-	}
-
-	proposal, err := repositories.GetProposalByID(id)
-	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Proposal not found"})
-		return
-	}
-
-	c.JSON(http.StatusOK, gin.H{"proposal": proposal})
-}
-
-// Add this import to your existing imports
+// ... (fungsi lain tetap sama) ...
 
 // Enhanced handler with better file handling and error recovery
+// fmt.Println("📥 Mulai proses upload proposal + project")
 func UploadProposalAndProjectHandler(c *gin.Context) {
 	fmt.Println("📥 Mulai proses upload proposal + project")
 
@@ -172,6 +57,7 @@ func UploadProposalAndProjectHandler(c *gin.Context) {
 	description := strings.TrimSpace(c.PostForm("deskripsi"))
 	regionIDStr := strings.TrimSpace(c.PostForm("region_id"))
 	budgetStr := strings.TrimSpace(c.PostForm("budget"))
+	alamat := strings.TrimSpace(c.PostForm("alamat")) // PERBAIKAN: Baca field alamat
 
 	// Validasi wajib isi
 	validationErrors := make(map[string]string)
@@ -186,6 +72,9 @@ func UploadProposalAndProjectHandler(c *gin.Context) {
 	}
 	if budgetStr == "" {
 		validationErrors["budget"] = "Budget wajib diisi"
+	}
+	if alamat == "" { // PERBAIKAN: Tambahkan validasi untuk alamat
+		validationErrors["alamat"] = "Alamat wajib diisi"
 	}
 	if len(validationErrors) > 0 {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Validasi gagal", "details": validationErrors})
@@ -281,6 +170,9 @@ func UploadProposalAndProjectHandler(c *gin.Context) {
 		RegionID:  regionID,
 		Status:    "belum dimulai",
 		Kategori:  category,
+		Alamat:    alamat,
+		// 👇 TAMBAHKAN BARIS INI
+		UserID: userID,
 	}
 
 	// Insert proyek ke DB
@@ -332,6 +224,11 @@ func UploadProposalAndProjectHandler(c *gin.Context) {
 
 // Enhanced file upload with better error handling
 func UploadFileToSupabase(file *multipart.FileHeader) (string, error) {
+
+	if !configs.IsStorageEnabled() {
+		return "", fmt.Errorf("fitur storage tidak aktif, periksa konfigurasi server")
+	}
+
 	src, err := file.Open()
 	if err != nil {
 		return "", fmt.Errorf("failed to open file: %w", err)
@@ -380,4 +277,54 @@ func UploadFileToSupabase(file *multipart.FileHeader) (string, error) {
 
 	fmt.Printf("File uploaded successfully: %s\n", publicURL)
 	return publicURL, nil
+}
+
+func GetAllProposalsHandler(c *gin.Context) {
+	proposals, err := repositories.GetAllProposals()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch proposals", "details": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, proposals)
+}
+
+// Get Proposals for the logged-in user
+func GetUserProposalsHandler(c *gin.Context) {
+	// Ambil userID dari context yang sudah di-set oleh middleware
+	userIDRaw, exists := c.Get("userId")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not authenticated"})
+		return
+	}
+
+	userID, ok := userIDRaw.(int)
+	if !ok {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Invalid user ID type in context"})
+		return
+	}
+
+	proposals, err := repositories.GetProposalsByUser(int64(userID))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch user proposals", "details": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, proposals)
+}
+
+// Get Proposal by ID
+func GetProposalByIDHandler(c *gin.Context) {
+	idStr := c.Param("id")
+	id, err := strconv.ParseInt(idStr, 10, 64)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid proposal ID format"})
+		return
+	}
+
+	proposal, err := repositories.GetProposalByID(id)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Proposal not found", "details": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, proposal)
 }

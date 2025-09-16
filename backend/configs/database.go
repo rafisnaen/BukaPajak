@@ -23,17 +23,18 @@ func ConnectSupaBase() error {
 	}
 
 	url := os.Getenv("SUPABASEURL")
-	key := os.Getenv("SUPABASEKEY")
+	// 👇 PERUBAHAN UTAMA ADA DI SINI. MENGGUNAKAN KUNCI SERVICE ROLE.
+	key := os.Getenv("SUPABASE_SERVICE_KEY")
 	serviceKey := os.Getenv("SUPABASE_SERVICE_KEY")
 
-	log.Printf("🔧 Config values - URL: %s, Key present: %t, Service Key present: %t",
-		url, key != "", serviceKey != "")
+	log.Printf("🔧 Config values - URL: %s, Service Key present: %t",
+		url, key != "")
 
 	if url == "" || key == "" {
-		return fmt.Errorf("SUPABASEURL or SUPABASEKEY environment variables not set")
+		return fmt.Errorf("SUPABASEURL or SUPABASE_SERVICE_KEY environment variables not set")
 	}
 
-	// Extract project ref dari SUPABASEURL
+	// ... sisa kode di fungsi ini tidak perlu diubah ...
 	if strings.HasPrefix(url, "https://") && strings.Contains(url, ".supabase.co") {
 		start := len("https://")
 		end := strings.Index(url, ".supabase.co")
@@ -43,31 +44,24 @@ func ConnectSupaBase() error {
 		}
 	}
 
-	// PostgREST (database) client
 	client, err := supa.NewClient(url, key, nil)
 	if err != nil {
 		return fmt.Errorf("failed to connect to Supabase DB client: %v", err)
 	}
 	Supabase = client
-	log.Printf("✅ Supabase database client connected")
+	log.Printf("✅ Supabase database client connected with service role permissions")
 
-	// Storage client - gunakan endpoint /storage/v1
 	if serviceKey != "" {
 		log.Printf("🔧 Initializing storage client with service key...")
-
 		storageURL := fmt.Sprintf("https://%s.supabase.co/storage/v1", SupabaseRef)
 		storageClient := storage_go.NewClient(storageURL, serviceKey, nil)
 		Storage = storageClient
-
-		// Test storage connection
 		if err := testStorageConnection(); err != nil {
 			log.Printf("❌ Storage connection failed: %v", err)
 			StorageEnabled = false
 		} else {
 			log.Printf("✅ Storage client connected successfully")
 			StorageEnabled = true
-
-			// Pastikan bucket proposals ada
 			if err := ensureProposalsBucket(); err != nil {
 				log.Printf("⚠️ Failed to ensure proposals bucket: %v", err)
 			}
@@ -76,12 +70,12 @@ func ConnectSupaBase() error {
 		log.Printf("❌ SUPABASE_SERVICE_KEY not set - file upload features disabled")
 		StorageEnabled = false
 	}
-
 	log.Printf("✅ Connected to Supabase database successfully (ref=%s)", SupabaseRef)
 	log.Printf("🔧 Storage enabled: %t", StorageEnabled)
 	return nil
 }
 
+// ... sisa file
 func testStorageConnection() error {
 	log.Printf("🔧 Testing storage connection...")
 	buckets, err := Storage.ListBuckets()
