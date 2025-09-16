@@ -29,7 +29,7 @@ func UploadFileToSupabase(file *multipart.FileHeader) (string, error) {
 	// must use pointer for ContentType
 	contentType := "application/pdf"
 
-	// ✅ use UploadFile (takes io.Reader)
+	// ✅ upload ke bucket "proposals"
 	_, err = configs.Storage.UploadFile("proposals", path, src, storage_go.FileOptions{
 		ContentType: &contentType,
 	})
@@ -37,7 +37,7 @@ func UploadFileToSupabase(file *multipart.FileHeader) (string, error) {
 		return "", fmt.Errorf("failed to upload to Supabase: %w", err)
 	}
 
-	// build public URL (since bucket is Public)
+	// build public URL (karena bucket Public)
 	publicURL := fmt.Sprintf(
 		"%s/storage/v1/object/public/proposals/%s",
 		os.Getenv("SUPABASEURL"),
@@ -48,9 +48,7 @@ func UploadFileToSupabase(file *multipart.FileHeader) (string, error) {
 }
 
 // ✅ Upload proposal handler
-// ✅ Upload proposal handler
 func UploadProposalHandler(c *gin.Context) {
-
 	if !configs.IsStorageEnabled() {
 		c.JSON(http.StatusServiceUnavailable, gin.H{
 			"error":   "File upload service temporarily unavailable",
@@ -59,13 +57,13 @@ func UploadProposalHandler(c *gin.Context) {
 		return
 	}
 
+	// ✅ ambil userId dari token
 	userIDRaw, exists := c.Get("userId")
 	if !exists {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "User ID not found in token"})
 		return
 	}
 
-	// ✅ Convert userId ke int64
 	userIDStr, ok := userIDRaw.(string)
 	if !ok {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid user ID format"})
@@ -78,14 +76,14 @@ func UploadProposalHandler(c *gin.Context) {
 		return
 	}
 
-	// Get file
+	// ✅ ambil file dari form-data
 	file, err := c.FormFile("file")
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "File is required"})
 		return
 	}
 
-	// Upload to Supabase
+	// upload ke Supabase Storage
 	publicURL, err := UploadFileToSupabase(file)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
@@ -95,11 +93,11 @@ func UploadProposalHandler(c *gin.Context) {
 		return
 	}
 
-	// Save proposal in DB
+	// simpan ke database
 	proposal := models.Proposal{
-		UserID:         int(userID), // ✅ sudah int64
+		UserID:         userID,
 		FileURL:        publicURL,
-		StatusProposal: "menunggu",
+		StatusProposal: "menunggu", // ✅ enum sesuai schema
 	}
 
 	created, err := repositories.InsertProposal(proposal)
@@ -136,7 +134,6 @@ func GetUserProposalsHandler(c *gin.Context) {
 		return
 	}
 
-	// ✅ convert string → int64
 	userIDStr, ok := userIDRaw.(string)
 	if !ok {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid user ID format"})
@@ -158,16 +155,20 @@ func GetUserProposalsHandler(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"proposals": proposals})
 }
 
-// Add this to your handlers/proposal.go
-func CheckConfigHandler(c *gin.Context) {
-	config := gin.H{
-		"supabase_connected":  configs.Supabase != nil,
-		"storage_connected":   configs.Storage != nil,
-		"storage_enabled":     configs.IsStorageEnabled(),
-		"supabase_ref":        configs.SupabaseRef,
-		"env_url_set":         os.Getenv("SUPABASEURL") != "",
-		"env_service_key_set": os.Getenv("SUPABASE_SERVICE_KEY") != "",
+// ✅ Get proposal by ID
+func GetProposalByIDHandler(c *gin.Context) {
+	idStr := c.Param("id")
+	id, err := strconv.ParseInt(idStr, 10, 64)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid proposal ID"})
+		return
 	}
 
-	c.JSON(http.StatusOK, config)
+	proposal, err := repositories.GetProposalByID(id)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Proposal not found"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"proposal": proposal})
 }

@@ -5,47 +5,20 @@ import (
 	"backend/models"
 	"encoding/json"
 	"fmt"
-	"mime/multipart"
-	"time"
-
-	storage_go "github.com/supabase-community/storage-go"
 )
-
-// UploadFileToSupabase uploads a PDF to the Supabase "proposals" bucket
-func UploadFileToSupabase(file *multipart.FileHeader) (string, error) {
-	src, err := file.Open()
-	if err != nil {
-		return "", err
-	}
-	defer src.Close()
-
-	path := fmt.Sprintf("proposals/%d-%s", time.Now().Unix(), file.Filename)
-
-	// must use a string pointer for ContentType
-	contentType := "application/pdf"
-
-	_, err = configs.Storage.UploadFile("proposals", path, src, storage_go.FileOptions{
-		ContentType: &contentType,
-	})
-	if err != nil {
-		return "", err
-	}
-
-	// Build public URL manually
-	publicURL := fmt.Sprintf(
-		"https://%s.supabase.co/storage/v1/object/public/proposals/%s",
-		configs.SupabaseRef,
-		path,
-	)
-
-	return publicURL, nil
-}
 
 // Insert proposal into DB
 func InsertProposal(proposal models.Proposal) (models.Proposal, error) {
+	// ✅ hanya insert field penting, jangan kirim id/created_at/updated_at
+	insertData := map[string]interface{}{
+		"file_url":        proposal.FileURL,
+		"status_proposal": proposal.StatusProposal,
+		"user_id":         proposal.UserID,
+	}
+
 	data, _, err := configs.Supabase.
 		From("proposals").
-		Insert(proposal, true, "", "", "").
+		Insert(insertData, true, "", "", "").
 		Execute()
 	if err != nil {
 		return models.Proposal{}, err
@@ -98,4 +71,24 @@ func GetAllProposals() ([]models.Proposal, error) {
 	}
 
 	return proposals, nil
+}
+
+// Get proposal by ID
+func GetProposalByID(id int64) (models.Proposal, error) {
+	data, _, err := configs.Supabase.
+		From("proposals").
+		Select("*", "", false).
+		Eq("id", fmt.Sprintf("%d", id)).
+		Single().
+		Execute()
+	if err != nil {
+		return models.Proposal{}, err
+	}
+
+	var proposal models.Proposal
+	if err := json.Unmarshal(data, &proposal); err != nil {
+		return models.Proposal{}, err
+	}
+
+	return proposal, nil
 }
