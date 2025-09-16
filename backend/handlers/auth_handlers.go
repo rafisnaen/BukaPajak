@@ -20,14 +20,19 @@ func Register(c *gin.Context) {
 		return
 	}
 
-	// ✅ Cek secret key
-	expectedKey := os.Getenv("USER_SECRET_KEY")
-	if req.SecretKey != expectedKey {
+	// Load keys from env
+	proposerKey := os.Getenv("USER_SECRET_KEY_PROPOSER")
+	auditorKey := os.Getenv("USER_SECRET_KEY_AUDITOR")
+	ownerKey := os.Getenv("USER_SECRET_KEY_OWNER")
+
+	// Validate secret key
+	if req.SecretKey != proposerKey && req.SecretKey != auditorKey && req.SecretKey != ownerKey {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid secret key"})
 		return
 	}
 
-	hash, _ := bcrypt.GenerateFromPassword([]byte(req.Password), 10)
+	// Hash password
+	hash, _ := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
 
 	user := models.UserPemerintah{
 		Email:    req.Email,

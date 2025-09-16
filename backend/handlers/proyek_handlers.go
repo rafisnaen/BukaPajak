@@ -21,11 +21,10 @@ func NewProjectHandler(repo *repositories.ProjectRepository) *ProjectHandler {
 	return &ProjectHandler{Repo: repo}
 }
 
-// Create Project
+// POST /projects
 func (h *ProjectHandler) CreateProject(c *gin.Context) {
 	var req schemas.ProjectRequest
-
-	if err := c.ShouldBind(&req); err != nil {
+	if err := c.ShouldBind(&req); err != nil { // pakai FormData
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
@@ -43,23 +42,25 @@ func (h *ProjectHandler) CreateProject(c *gin.Context) {
 	}
 
 	proyek := models.Proyek{
-		Judul:          req.Judul,
-		Deskripsi:      req.Deskripsi,
-		ProjectManager: req.ProjectManager,
-		Budget:         req.Budget,
-		GambarURL:      filePath,
-		RegionID:       req.RegionID,
-		Status:         req.Status,
-		Kategori:       req.Kategori,
+		Judul:     req.Judul,
+		Deskripsi: req.Deskripsi,
+		Budget:    req.Budget,
+		GambarURL: filePath,
+		RegionID:  &req.RegionID,
+		Status:    "pending",
+		Kategori:  req.Kategori,
 	}
 
-	if err := h.Repo.CreateProject(proyek); err != nil {
-		fmt.Println("DEBUG ERROR:", err) // 👉 cek error sebenarnya
+	// Simpan project ke database
+	projectID, err := h.Repo.CreateProject(proyek) // ✅ ambil 2 return
+	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
+	proyek.ID = projectID // ✅ assign ID hasil insert
 
 	c.JSON(http.StatusOK, gin.H{"message": "Project created successfully", "data": proyek})
+
 }
 
 // Get All Projects

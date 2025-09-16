@@ -3,6 +3,7 @@ package handlers
 import (
 	"backend/models"
 	"backend/repositories"
+	"backend/schemas"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -10,27 +11,29 @@ import (
 
 // POST /regions
 func CreateRegionHandler(c *gin.Context) {
-	var req models.Region
-	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": "invalid request",
-			"msg":   err.Error(),
-		})
+	var req schemas.CreateRegionRequest
+	if err := c.ShouldBindJSON(&req); err != nil { // JSON
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	if err := repositories.CreateRegion(req); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": "failed to create region",
-			"msg":   err.Error(),
-		})
+	region := models.Region{
+		NamaRegion:     req.NamaRegion,
+		DanaDiterima:   req.DanaDiterima,
+		DanaDipakai:    req.DanaDipakai,
+		Kota:           req.Kota,
+		TotalProyek:    req.TotalProyek,
+		Selesai:        req.Selesai,
+		Berlangsung:    req.Berlangsung,
+		JumlahPenduduk: req.JumlahPenduduk,
+	}
+
+	if err := repositories.CreateRegion(region); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusCreated, gin.H{
-		"message": "region created successfully",
-		"data":    req,
-	})
+	c.JSON(http.StatusCreated, gin.H{"message": "Region created successfully", "data": region})
 }
 
 // GET /regions

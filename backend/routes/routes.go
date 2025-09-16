@@ -103,24 +103,20 @@ func SmartContract(router *gin.Engine) {
 func WalletRoutes(r *gin.Engine) {
 	api := r.Group("/api")
 
-	// auth normal
-
-	// wallet
 	api.GET("/wallet/nonce", handlers.GenerateNonce)
 	api.POST("/wallet/verify", handlers.VerifyWallet)
 
-	// dashboard (protected)
 }
 
-// routes/proposal_routes.go
 func ProposalRoutes(r *gin.Engine) {
 	api := r.Group("/api/v1")
-	api.Use(middlewares.AuthMiddleware()) // protect with JWT
+	api.Use(middlewares.AuthMiddleware())
 	{
-		api.POST("/proposals/upload", handlers.UploadProposalHandler) // Use the wrapper handler
+		api.POST("/proposals/upload", handlers.UploadProposalHandler)
+		api.POST("/proposals/full", handlers.UploadProposalAndProjectHandler) // ✅ baru
 		api.GET("/proposals", handlers.GetAllProposalsHandler)
 		api.GET("/proposals/me", handlers.GetUserProposalsHandler)
-		api.GET("/proposals/:id", handlers.GetProposalByIDHandler) // ✅ baru
+		api.GET("/proposals/:id", handlers.GetProposalByIDHandler)
 
 	}
 }
