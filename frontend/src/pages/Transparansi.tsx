@@ -9,6 +9,7 @@ import AdministrativeLevel from "@/components/ui/administrative-level";
 import ProjectCard from "@/components/ui/project-card";
 import { getDetailedProvinceById, detailedProvinces } from "@/data/detailed-provinces";
 import { provinces } from "@/data/provinces";
+import Footer from "@/components/Footer";
 
 const Transparansi = () => {
   const { provinceId } = useParams();
@@ -61,6 +62,7 @@ const Transparansi = () => {
               </Card>
           )}
         </main>
+        <Footer />
       </div>
     );
   }
@@ -292,6 +294,7 @@ const Transparansi = () => {
           </Card>
         )}
       </main>
+      <Footer />
     </div>
   );
 };
