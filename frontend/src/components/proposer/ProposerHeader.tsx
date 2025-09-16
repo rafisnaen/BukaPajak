@@ -1,3 +1,4 @@
+// src/components/proposer/ProposerHeader.tsx
 import { Bell, Wallet, CheckCircle, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -20,16 +21,8 @@ const mockNotifications = [
     status: "rejected",
     time: "1 jam lalu",
   },
-  {
-    id: 3,
-    title: "Proposal Disetujui",
-    description: "Proposal Anda 'Pembangunan Jembatan Desa Sukamaju' telah disetujui dan didanai.",
-    status: "approved",
-    time: "2 hari lalu",
-  },
 ];
 
-// Definisikan interface untuk props
 interface ProposerHeaderProps {
     walletAddress: string | null;
     proposerName: string;
@@ -40,18 +33,16 @@ export const ProposerHeader = ({ walletAddress, proposerName }: ProposerHeaderPr
     
     const formatAddress = (address: string | null) => {
         if (!address) return "Wallet Not Connected";
-        return `${address.substring(0, 6)}...${address.substring(address.length - 4)}`;
+        return `${address.substring(0, 6)}....${address.substring(address.length - 4)}`;
     }
 
     return (
         <header className="bg-white border-b p-4 flex justify-between items-center">
-            {/* Bagian Kiri: Sapaan dan Nama Proposer */}
             <div>
                 <p className="text-sm text-muted-foreground">Login sebagai Proposer,</p>
                 <p className="font-semibold text-foreground">{proposerName}</p>
             </div>
 
-            {/* Bagian Kanan: Notifikasi dan Info Wallet */}
             <div className="flex items-center space-x-4">
                 <Popover onOpenChange={() => setHasUnread(false)}>
                     <PopoverTrigger asChild>
