@@ -1,5 +1,4 @@
 // src/components/proposer/Sidebar.tsx
-
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard,
@@ -7,8 +6,8 @@ import {
   UploadCloud,
   LogOut,
   ChevronRight,
+  BarChart, // Ikon baru
 } from "lucide-react";
-// Impor logo Anda. Pastikan path-nya benar.
 import BukaPajakLogo from "@/assets/Group 2.svg";
 
 export const Sidebar = () => {
@@ -19,35 +18,30 @@ export const Sidebar = () => {
     { href: "/proposer/dashboard", label: "Dashboard", icon: LayoutDashboard },
     { href: "/proposer/new", label: "Upload Proposal", icon: UploadCloud },
     { href: "/proposer/history", label: "Riwayat Proposal", icon: FileText },
+    { href: "/proposer/update-progress", label: "Update Progress", icon: BarChart }, // Item baru
   ];
 
   const handleLogout = () => {
-  // Hapus data yang tersimpan di localStorage
-  localStorage.removeItem("token");
-  localStorage.removeItem("user");
-
-  // Kalau mau hapus semua (opsional):
-  // localStorage.clear();
-
-  // Redirect ke login
-  navigate("/login");
-};
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    navigate("/login");
+  };
 
   return (
     <aside className="w-64 bg-blue-800 text-white flex flex-col fixed h-screen">
-        <div className="flex items-center space-x-3 p-2">
-            <div className="bg-blue-600 rounded-lg h-10 w-10 relative">
-                <img 
-                src={BukaPajakLogo} 
-                alt="BukaPajak Logo" 
-                className="absolute h-10 w-10" 
-                style={{ top: "4px", left: "9px" }}
-                />
-            </div>
-            <span className="font-bold text-xl">
-                BukaPajak <span className="font-light text-yellow-400">Proposer</span>
-            </span>
+      <div className="flex items-center space-x-3 p-2">
+        <div className="bg-blue-600 rounded-lg h-10 w-10 relative">
+          <img
+            src={BukaPajakLogo}
+            alt="BukaPajak Logo"
+            className="absolute h-10 w-10"
+            style={{ top: "4px", left: "9px" }}
+          />
         </div>
+        <span className="font-bold text-xl">
+          BukaPajak <span className="font-light text-yellow-400">Proposer</span>
+        </span>
+      </div>
 
       <nav className="flex-grow p-4 space-y-2">
         {navItems.map((item) => (
