@@ -22,9 +22,16 @@ export const Sidebar = () => {
   ];
 
   const handleLogout = () => {
-    // kalau ada logic logout (hapus token dsb) taruh di sini
-    navigate("/login");
-  };
+  // Hapus data yang tersimpan di localStorage
+  localStorage.removeItem("token");
+  localStorage.removeItem("user");
+
+  // Kalau mau hapus semua (opsional):
+  // localStorage.clear();
+
+  // Redirect ke login
+  navigate("/login");
+};
 
   return (
     <aside className="w-64 bg-blue-800 text-white flex flex-col fixed h-screen">
