@@ -28,45 +28,55 @@ const DoubleVerifierPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
-  const handleVerification = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
+ const handleVerification = async (e: React.FormEvent) => {
+  e.preventDefault();
+  setIsLoading(true);
 
-    if (!role || !secretKey) {
-      toast.error("Harap pilih peran dan masukkan Kode Khusus Role.");
+  if (!role || !secretKey) {
+    toast.error("Harap pilih peran dan masukkan Kode Khusus Role.");
+    setIsLoading(false);
+    return;
+  }
+
+  try {
+    const res = await fetch("http://localhost:8080/api/verify", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ role, secret_key: secretKey }),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      toast.error("Verifikasi gagal", {
+        description: data.error || "Kode Khusus tidak valid.",
+      });
       setIsLoading(false);
       return;
     }
 
-    // Simulasi verifikasi ke backend
-    // Di aplikasi nyata, Anda akan mengirim `role` dan `secretKey` ke server
-    console.log(`Verifying role: ${role} with key: ${secretKey}`);
+    toast.success("Verifikasi berhasil! Mengarahkan ke dashboard...");
 
-    setTimeout(() => {
-      // Logika simulasi: Kunci "benar" jika tidak kosong
-      if (secretKey) {
-        toast.success("Verifikasi berhasil! Mengarahkan ke dashboard...");
-        switch (role) {
-          case "owner":
-            navigate("/owner/dashboard");
-            break;
-          case "auditor":
-            navigate("/auditor/dashboard");
-            break;
-          case "proposer":
-            navigate("/proposer/dashboard");
-            break;
-          default:
-            navigate("/login");
-        }
-      } else {
-        toast.error("Verifikasi Gagal", {
-          description: "Kode Khusus Role yang Anda masukkan tidak valid.",
-        });
-      }
-      setIsLoading(false);
-    }, 1500);
-  };
+    switch (role) {
+      case "owner":
+        navigate("/owner/dashboard");
+        break;
+      case "auditor":
+        navigate("/auditor/dashboard");
+        break;
+      case "proposer":
+        navigate("/proposer/dashboard");
+        break;
+      default:
+        navigate("/login");
+    }
+  } catch (err) {
+    toast.error("Terjadi kesalahan saat verifikasi.");
+  } finally {
+    setIsLoading(false);
+  }
+};
+
 
   return (
     <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
