@@ -10,10 +10,8 @@ import NotFound from "./pages/NotFound";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import DashboardPage from "./pages/DashboardPage";
-// import Regional from "./pages/Regional";
-// import Transparansi from "./pages/Transparansi";
 import Tentang from "./pages/Tentang";
-import DoubleVerifierPage from "./pages/DoubleVerifierPage"; // Impor halaman baru
+import DoubleVerifierPage from "./pages/DoubleVerifierPage";
 
 // --- Halaman Pengusul ---
 import ProposerDashboardPage from "./pages/proposer/DashboardPage";
@@ -48,9 +46,6 @@ const App = () => (
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/dashboard" element={<DashboardPage />} />
-          {/* <Route path="/regional" element={<Regional />} /> */}
-          {/* <Route path="/transparansi/:provinceId" element={<Transparansi />} />
-          <Route path="/transparansi" element={<Transparansi />} /> */}
           <Route path="/tentang" element={<Tentang />} />
 
           {/* --- Rute Verifikasi (Protected) --- */}
@@ -97,15 +92,57 @@ const App = () => (
             }
           />
 
-          {/* --- Rute Khusus Auditor --- */}
-          <Route path="/auditor/dashboard" element={<AuditorDashboardPage />} />
-          <Route path="/auditor/review/:proposalId" element={<AuditorReviewPage />} />
-          <Route path="/auditor/history" element={<AuditorHistoryPage />} />
-          <Route path="/auditor/history/:proposalId" element={<AuditorHistoryDetailPage />} />
+          {/* --- Rute Khusus Auditor (Protected) --- */}
+          <Route
+            path="/auditor/dashboard"
+            element={
+              <ProtectedRoute>
+                <AuditorDashboardPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/auditor/review/:id"
+            element={
+              <ProtectedRoute>
+                <AuditorReviewPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/auditor/history"
+            element={
+              <ProtectedRoute>
+                <AuditorHistoryPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/auditor/history/:id"
+            element={
+              <ProtectedRoute>
+                <AuditorHistoryDetailPage />
+              </ProtectedRoute>
+            }
+          />
 
-          {/* --- Rute Khusus Owner --- */}
-          <Route path="/owner/dashboard" element={<OwnerDashboardPage />} />
-          <Route path="/owner/roles" element={<RoleManagementPage />} />
+          {/* --- Rute Khusus Owner (Protected) --- */}
+          <Route
+            path="/owner/dashboard"
+            element={
+              <ProtectedRoute>
+                <OwnerDashboardPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/owner/roles"
+            element={
+              <ProtectedRoute>
+                <RoleManagementPage />
+              </ProtectedRoute>
+            }
+          />
 
           {/* Catch-all */}
           <Route path="*" element={<NotFound />} />

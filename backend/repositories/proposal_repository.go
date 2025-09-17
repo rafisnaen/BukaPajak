@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"strconv"
 )
 
 // ✅ Insert proposal dan langsung return row dari Supabase
@@ -204,4 +205,73 @@ func LogProposalDownload(proposalID, userID int64, gatewayUsed, clientIP string)
 		Execute()
 
 	return err
+}
+
+func GetProposalWithDetailByID(proposalID int64) (*models.ProposalWithDetail, error) {
+	// Convert ID ke string
+	proposalIDStr := strconv.FormatInt(proposalID, 10)
+
+	// Ambil proposal berdasarkan ID
+	dataProposal, _, err := configs.Supabase.
+		From("proposals").
+		Select("*", "", false).
+		Eq("id", proposalIDStr).
+		Single().
+		Execute()
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch proposal: %w", err)
+	}
+	var proposal models.Proposal
+	if err := json.Unmarshal(dataProposal, &proposal); err != nil {
+		return nil, err
+	}
+
+	// Ambil proyek terkait
+	projectIDStr := strconv.FormatInt(proposal.ProjectID, 10)
+	dataProyek, _, err := configs.Supabase.
+		From("proyek").
+		Select("*", "", false).
+		Eq("id", projectIDStr).
+		Single().
+		Execute()
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch proyek: %w", err)
+	}
+	var proyek models.Proyek
+	if err := json.Unmarshal(dataProyek, &proyek); err != nil {
+		return nil, err
+	}
+
+	// Ambil region terkait (kalau ada)
+	var regionName string
+	if proyek.RegionID != nil {
+		regionIDStr := strconv.FormatInt(*proyek.RegionID, 10)
+		dataRegion, _, err := configs.Supabase.
+			From("region_data").
+			Select("*", "", false).
+			Eq("id", regionIDStr).
+			Single().
+			Execute()
+		if err != nil {
+			return nil, fmt.Errorf("failed to fetch region: %w", err)
+		}
+		var region models.Region
+		if err := json.Unmarshal(dataRegion, &region); err != nil {
+			return nil, err
+		}
+		regionName = region.NamaRegion
+	}
+
+	// Gabungkan hasil
+	result := models.ProposalWithDetail{
+		Proposal:    proposal,
+		ProjectName: proyek.Judul,
+		Region:      regionName,
+		Budget:      proyek.Budget,
+		Kategori:    &proyek.Kategori,
+		Alamat:      &proyek.Alamat,
+		Pengusul:    "", // kosongkan, karena tidak ambil dari tabel user
+	}
+
+	return &result, nil
 }

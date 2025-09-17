@@ -85,61 +85,61 @@ func GetProposalHandler(c *gin.Context) {
 	})
 }
 
-func ApproveProposalHandler(c *gin.Context) {
-	proposalID := c.Param("id")
+// func ApproveProposalHandler(c *gin.Context) {
+// 	proposalID := c.Param("id")
 
-	id := new(big.Int)
-	_, success := id.SetString(proposalID, 10)
-	if !success {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid proposal ID"})
-		return
-	}
+// 	id := new(big.Int)
+// 	_, success := id.SetString(proposalID, 10)
+// 	if !success {
+// 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid proposal ID"})
+// 		return
+// 	}
 
-	txHash, err := repositories.ApproveProposal(id)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to approve proposal: " + err.Error()})
-		return
-	}
+// 	txHash, err := repositories.ApproveProposal(id)
+// 	if err != nil {
+// 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to approve proposal: " + err.Error()})
+// 		return
+// 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"message":     "Proposal approved successfully",
-		"tx_hash":     txHash,
-		"proposal_id": proposalID,
-	})
-}
+// 	c.JSON(http.StatusOK, gin.H{
+// 		"message":     "Proposal approved successfully",
+// 		"tx_hash":     txHash,
+// 		"proposal_id": proposalID,
+// 	})
+// }
 
-func RejectProposalHandler(c *gin.Context) {
-	proposalID := c.Param("id")
+// func RejectProposalHandler(c *gin.Context) {
+// 	proposalID := c.Param("id")
 
-	id := new(big.Int)
-	_, success := id.SetString(proposalID, 10)
-	if !success {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid proposal ID"})
-		return
-	}
+// 	id := new(big.Int)
+// 	_, success := id.SetString(proposalID, 10)
+// 	if !success {
+// 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid proposal ID"})
+// 		return
+// 	}
 
-	var req struct {
-		Reason string `json:"reason" binding:"required"`
-	}
+// 	var req struct {
+// 		Reason string `json:"reason" binding:"required"`
+// 	}
 
-	if err := c.BindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid request: " + err.Error()})
-		return
-	}
+// 	if err := c.BindJSON(&req); err != nil {
+// 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid request: " + err.Error()})
+// 		return
+// 	}
 
-	txHash, err := repositories.RejectProposal(id, req.Reason)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to reject proposal: " + err.Error()})
-		return
-	}
+// 	txHash, err := repositories.RejectProposal(id, req.Reason)
+// 	if err != nil {
+// 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to reject proposal: " + err.Error()})
+// 		return
+// 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"message":     "Proposal rejected",
-		"tx_hash":     txHash,
-		"proposal_id": proposalID,
-		"reason":      req.Reason,
-	})
-}
+// 	c.JSON(http.StatusOK, gin.H{
+// 		"message":     "Proposal rejected",
+// 		"tx_hash":     txHash,
+// 		"proposal_id": proposalID,
+// 		"reason":      req.Reason,
+// 	})
+// }
 
 func ReleaseFundsHandler(c *gin.Context) {
 	var req struct {

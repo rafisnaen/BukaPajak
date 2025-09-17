@@ -85,8 +85,8 @@ func SmartContract(router *gin.Engine) {
 		api.GET("/proposals_sc/pending", handlers.GetPendingProposalsHandler)
 		api.GET("/proposals_sc/status/:status", handlers.GetProposalsByStatusHandler)
 		// api.GET("/proposals_sc/user/:address", handlers.GetUserProposalsHandler) // This is now handled by /proposals/me
-		api.POST("/proposals_sc/:id/approve", handlers.ApproveProposalHandler)
-		api.POST("/proposals_sc/:id/reject", handlers.RejectProposalHandler)
+		// api.POST("/proposals_sc/:id/approve", handlers.ApproveProposalHandler)
+		// api.POST("/proposals_sc/:id/reject", handlers.RejectProposalHandler)
 
 		// Fund management endpoints
 		api.POST("/deposit", handlers.DepositHandler)
@@ -122,6 +122,9 @@ func ProposalRoutes(r *gin.Engine) {
 		// Rute untuk mendapatkan detail proposal berdasarkan ID
 		api.GET("/proposals/:id", handlers.GetProposalByIDHandler)
 		api.GET("/proposals/projects", handlers.GetAllProposalsWithDetailHandler)
+		api.GET("/proposals/:id/projects", handlers.GetProposalWithDetailByIDHandler)
+		api.POST("/proposals/:id/reject", handlers.RejectProposalHandler)
+		api.POST("/proposals/:id/accept", handlers.AcceptProposalHandler)
 	}
 }
 
@@ -136,7 +139,7 @@ func RouteIPFS(r *gin.Engine) {
 		api.POST("/proposal/upload", handlers.UploadProposalHandler_Pinata)
 		api.GET("/proposal/:id/upload", handlers.DownloadProposalHandler) // ✅ IPFS
 		// api.GET("/proposal/list", handlers.GetAllProposalsHandler_P)            // ✅ IPFS
-		// api.GET("/proposal/:id", handlers.GetProposalByIDHandler_IPFS)          // ✅ IPFS
+		api.GET("/proposal/:id", handlers.GetProposalByIDHandler_Pinata) // ✅ IPFS
 		// api.GET("/proposal/user", handlers.GetUserProposalsHandler_IPFS)        // ✅ IPFS
 		// api.PATCH("/proposal/:id/status", handlers.UpdateProposalStatusHandler) // masih sama
 	}

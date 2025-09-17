@@ -101,3 +101,37 @@ func UploadProposalHandler_Pinata(c *gin.Context) {
 		},
 	})
 }
+
+// GET /proposal/:id
+func GetProposalByIDHandler_Pinata(c *gin.Context) {
+	// Ambil ID dari URL param
+	idStr := c.Param("id")
+	id, err := strconv.ParseInt(idStr, 10, 64)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid proposal ID"})
+		return
+	}
+
+	// Panggil repository untuk ambil data
+	proposal, err := repositories.GetProposalByID_IPFS(id)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Proposal not found"})
+		return
+	}
+
+	// Response sukses
+	c.JSON(http.StatusOK, gin.H{
+		"message": "Proposal ditemukan",
+		"data": gin.H{
+			"id":          proposal.ID,
+			"file_url":    proposal.FileURL,
+			"cid":         proposal.CID,
+			"gateway_url": proposal.GatewayURL,
+			"status":      proposal.StatusProposal,
+			"user_id":     proposal.UserID,
+			"project_id":  proposal.ProjectID,
+			"created_at":  proposal.CreatedAt,
+			"updated_at":  proposal.UpdatedAt,
+		},
+	})
+}
