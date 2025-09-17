@@ -1,7 +1,7 @@
 import Header from "@/components/Header";
 import HeroSection from "@/components/HeroSection";
 import { RegisterForm } from "@/components/RegisterForm";
-import heroBackground from "@/assets/hero-bg.svg";
+import djpImage from "@/assets/djp-ri.svg";
 
 const Index = () => {
   return (
@@ -13,7 +13,7 @@ const Index = () => {
         {/* Background Image */}
         <div className="absolute inset-0">
           <img 
-            src={heroBackground} 
+            src={djpImage} 
             alt="Government building background" 
             className="w-full h-full object-cover"
           />
