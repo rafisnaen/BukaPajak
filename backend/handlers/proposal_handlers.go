@@ -1,5 +1,3 @@
-// backend/handlers/proposal_handlers.go
-
 package handlers
 
 import (
@@ -26,6 +24,7 @@ func UploadProposalHandler(c *gin.Context) {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not authenticated"})
 		return
 	}
+
 	userID, _ := strconv.ParseInt(fmt.Sprint(userIDRaw), 10, 64)
 
 	projectIDStr := c.PostForm("project_id")
@@ -50,7 +49,10 @@ func UploadProposalHandler(c *gin.Context) {
 
 	proposalURL, err := UploadFileToSupabase(proposalFile)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Gagal upload proposal", "details": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error":   "Gagal upload proposal",
+			"details": err.Error(),
+		})
 		return
 	}
 
@@ -62,7 +64,10 @@ func UploadProposalHandler(c *gin.Context) {
 	}
 
 	if err := repositories.CreateProposal(proposal); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Gagal menyimpan proposal", "details": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error":   "Gagal menyimpan proposal",
+			"details": err.Error(),
+		})
 		return
 	}
 
@@ -74,7 +79,6 @@ func UploadProposalHandler(c *gin.Context) {
 
 // Enhanced file upload with better error handling
 func UploadFileToSupabase(file *multipart.FileHeader) (string, error) {
-
 	if !configs.IsStorageEnabled() {
 		return "", fmt.Errorf("fitur storage tidak aktif, periksa konfigurasi server")
 	}
@@ -88,6 +92,7 @@ func UploadFileToSupabase(file *multipart.FileHeader) (string, error) {
 	// Create unique file path
 	ext := filepath.Ext(file.Filename)
 	fileName := strings.TrimSuffix(filepath.Base(file.Filename), ext)
+
 	// Clean filename to avoid issues
 	fileName = strings.ReplaceAll(fileName, " ", "_")
 	fileName = strings.ReplaceAll(fileName, "(", "")
@@ -132,9 +137,13 @@ func UploadFileToSupabase(file *multipart.FileHeader) (string, error) {
 func GetAllProposalsHandler(c *gin.Context) {
 	proposals, err := repositories.GetAllProposals()
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch proposals", "details": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error":   "Failed to fetch proposals",
+			"details": err.Error(),
+		})
 		return
 	}
+
 	c.JSON(http.StatusOK, proposals)
 }
 
@@ -155,9 +164,13 @@ func GetUserProposalsHandler(c *gin.Context) {
 
 	proposals, err := repositories.GetProposalsByUser(int64(userID))
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch user proposals", "details": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error":   "Failed to fetch user proposals",
+			"details": err.Error(),
+		})
 		return
 	}
+
 	c.JSON(http.StatusOK, proposals)
 }
 
@@ -172,7 +185,10 @@ func GetProposalByIDHandler(c *gin.Context) {
 
 	proposal, err := repositories.GetProposalByID(id)
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Proposal not found", "details": err.Error()})
+		c.JSON(http.StatusNotFound, gin.H{
+			"error":   "Proposal not found",
+			"details": err.Error(),
+		})
 		return
 	}
 

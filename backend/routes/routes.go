@@ -21,11 +21,11 @@ func ProjectRoutes(r *gin.Engine) {
 		api.POST("", handlers.CreateProyekHandler)
 
 	}
-	// Project := r.Group("/admin/projects")
-	// {
-	// 	// Project.GET("", projectHandler.GetAllProjects)
-	// 	// Project.GET("/:id", projectHandler.GetProjectByID)
-	// }
+	Project := r.Group("/admin/projects")
+	{
+		Project.GET("", handlers.GetAllProyekHandler)
+		Project.GET("/:id", handlers.GetProposalByIDHandler)
+	}
 }
 func RegionRoutes(r *gin.Engine) {
 	api := r.Group("/api/v1/regions") // ✅ konsisten dengan frontend

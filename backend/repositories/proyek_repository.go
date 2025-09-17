@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"log"
 	"strconv"
+	"strings"
 )
 
 var ValidStatus = []string{"belum dimulai", "berlangsung", "selesai"}
@@ -26,24 +27,59 @@ func isValidEnum(value string, validList []string) bool {
 
 // --- Repository Functions ---
 func CreateProyek(ctx context.Context, proyek *models.Proyek) error {
-	// Validasi enum
-	if proyek.Status != "" && !isValidEnum(proyek.Status, ValidStatus) {
-		return fmt.Errorf("invalid status: %s", proyek.Status)
-	}
-	if proyek.Kategori != "" && !isValidEnum(proyek.Kategori, ValidKategori) {
-		return fmt.Errorf("invalid kategori: %s", proyek.Kategori)
+	// --- Normalisasi & validasi status ---
+	if proyek.Status != "" {
+		proyek.Status = strings.ToLower(proyek.Status)
+		if !isValidEnum(proyek.Status, ValidStatus) {
+			return fmt.Errorf("invalid status: %s (must be one of %v)", proyek.Status, ValidStatus)
+		}
 	}
 
-	// Insert ke Supabase
-	log.Printf("📝 Inserting proyek: %+v", proyek)
-	_, _, err := configs.Supabase.
+	// --- Normalisasi & validasi kategori ---
+	if proyek.Kategori != "" {
+		proyek.Kategori = strings.ToLower(proyek.Kategori)
+		if !isValidEnum(proyek.Kategori, ValidKategori) {
+			return fmt.Errorf("invalid kategori: %s (must be one of %v)", proyek.Kategori, ValidKategori)
+		}
+	}
+
+	// --- Dereference region_id biar gak kirim pointer ---
+	var regionID interface{}
+	if proyek.RegionID != nil {
+		regionID = *proyek.RegionID
+	} else {
+		regionID = nil
+	}
+
+	// --- Mapping struct -> map ---
+	data := map[string]interface{}{
+		"judul":      proyek.Judul,
+		"deskripsi":  proyek.Deskripsi,
+		"budget":     proyek.Budget,
+		"gambar_url": proyek.GambarURL,
+		"region_id":  regionID,
+		"status":     proyek.Status,
+		"kategori":   proyek.Kategori,
+		"alamat":     proyek.Alamat,
+	}
+
+	log.Printf("📝 Inserting proyek: %+v", data)
+
+	var created []models.Proyek
+	_, err := configs.Supabase.
 		From("proyek").
-		Insert(proyek, false, "", "", "").
-		Execute()
+		Insert(data, true, "", "", ""). // ✅ return representation
+		ExecuteTo(&created)
 
 	if err != nil {
 		return fmt.Errorf("failed to insert proyek: %w", err)
 	}
+	if len(created) == 0 {
+		return errors.New("insert failed: no proyek returned")
+	}
+
+	// update pointer supaya ID ikut keisi
+	*proyek = created[0]
 	return nil
 }
 
@@ -69,7 +105,7 @@ func GetAllProyek(ctx context.Context) ([]models.Proyek, error) {
 func GetProyekByID(ctx context.Context, id int64) (*models.Proyek, error) {
 	var proyek []models.Proyek
 
-	idStr := strconv.FormatInt(id, 10) // ✅ convert int64 -> string
+	idStr := strconv.FormatInt(id, 10)
 	data, _, err := configs.Supabase.
 		From("proyek").
 		Select("*", "", false).
