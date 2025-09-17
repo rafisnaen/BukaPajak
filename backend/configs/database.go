@@ -49,12 +49,10 @@ func ConnectSupaBase() error {
 	client, err := supa.NewClient(url, key, nil)
 	if err != nil {
 		return fmt.Errorf("failed to connect to Supabase: %v", err)
-		return fmt.Errorf("failed to connect to Supabase DB client: %v", err)
 	}
 
 	Supabase = client
 	log.Printf("✅ Connected to Supabase successfully")
-	log.Printf("✅ Supabase database client connected")
 
 	// Storage client - gunakan endpoint /storage/v1
 	if serviceKey != "" {
@@ -82,7 +80,6 @@ func ConnectSupaBase() error {
 		StorageEnabled = false
 	}
 
-	log.Printf("✅ Connected to Supabase database successfully (ref=%s)", SupabaseRef)
 	log.Printf("🔧 Storage enabled: %t", StorageEnabled)
 	return nil
 }
