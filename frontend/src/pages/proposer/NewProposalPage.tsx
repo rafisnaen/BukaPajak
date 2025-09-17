@@ -1,5 +1,3 @@
-// src/pages/proposer/NewProposalPage.tsx - Komponen yang diperbaiki
-
 import React, { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -23,44 +21,40 @@ import {
   Image as ImageIcon,
   CheckCircle,
   ArrowRight,
+  Loader2,
   AlertCircle,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { ProposerLayout } from "../../components/proposer/ProposerLayout";
 import { cn } from "@/lib/utils";
-import { uploadProposalAndProject, getAllRegions, validateFile } from "@/api/proposal";
-import { getAllProjects, ApiProject } from "@/api/projectApi"; // Import project API
+import { createProject } from "@/api/project";
+import { uploadProposal } from "@/api/proposal";
+import { getAllRegions, Region } from "@/api/region";
 
 const STEPS = [
-  { id: 1, title: "Detail Proposal" },
-  { id: 2, title: "Unggah Dokumen" },
+  { id: 1, title: "Detail Proyek" },
+  { id: 2, title: "Unggah Dokumen Proposal" },
   { id: 3, title: "Selesai" },
 ];
 
-// Interface untuk Region
-interface Region {
-  id: number;
-  nama_region: string;
-  kota: string;
-}
-
-export default function UploadProposal() {
+export default function NewProposalPage() {
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [provinces, setProvinces] = useState<Region[]>([]);
-  const [projects, setProjects] = useState<ApiProject[]>([]); // State for projects
-  const [selectedProject, setSelectedProject] = useState<string>(""); // State for selected project
-  const [isLoadingProvinces, setIsLoadingProvinces] = useState(true);
+  const [isCreatingProject, setIsCreatingProject] = useState(false);
+  const [isLoadingRegions, setIsLoadingRegions] = useState(true);
+  const [regionsError, setRegionsError] = useState<string | null>(null);
+  
+  const [regions, setRegions] = useState<Region[]>([]);
   
   const [formData, setFormData] = useState({
-    projectName: "",
-    ethAmount: "",
-    regionId: "",
-    address: "",
-    category: "",
-    description: "",
+    judul: "",
+    budget: "",
+    region_id: "",
+    kategori: "",
+    alamat: "",
+    deskripsi: "",
   });
   
   const [documentFile, setDocumentFile] = useState<File | null>(null);
@@ -68,79 +62,68 @@ export default function UploadProposal() {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [idrValue, setIdrValue] = useState<string>("");
   const [ethToIdrRate, setEthToIdrRate] = useState<number | null>(null);
-  const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
+  const [createdProjectId, setCreatedProjectId] = useState<number | null>(null);
 
   const documentInputRef = useRef<HTMLInputElement>(null);
   const imageInputRef = useRef<HTMLInputElement>(null);
 
-  // Load data provinsi saat komponen mount
+  // ✅ Fetch regions dari API http://localhost:8080/api/v1/regions
   useEffect(() => {
-    const loadProvinces = async () => {
+    const fetchRegions = async () => {
       try {
-        setIsLoadingProvinces(true);
-        const data = await getAllRegions();
-        console.log("Provinces loaded:", data);
-        setProvinces(data);
+        setIsLoadingRegions(true);
+        setRegionsError(null);
+        
+        const regionsData = await getAllRegions();
+        setRegions(regionsData);
+        
+        console.log("Regions loaded:", regionsData);
+        
+        if (regionsData.length === 0) {
+          setRegionsError("Tidak ada data provinsi tersedia");
+          toast.warning("Data provinsi kosong");
+        } else {
+          toast.success(`Data provinsi berhasil dimuat (${regionsData.length} item)`);
+        }
       } catch (error: any) {
-        console.error("Error loading provinces:", error);
-        toast.error(error.message || "Gagal memuat data provinsi");
+        console.error("Error fetching regions:", error);
+        const errorMessage = error.response?.data?.message || error.message || "Gagal memuat data provinsi";
+        setRegionsError(errorMessage);
+        toast.error(errorMessage);
       } finally {
-        setIsLoadingProvinces(false);
+        setIsLoadingRegions(false);
       }
     };
-
-    loadProvinces();
+    
+    fetchRegions();
   }, []);
 
-  // Fetch Projects for Step 2
-  useEffect(() => {
-    if (currentStep === 2) {
-      const fetchProjects = async () => {
-        try {
-          const projectData = await getAllProjects();
-          // Filter projects based on the project name from step 1
-          const filteredProjects = projectData.filter(p => p.judul.toLowerCase() === formData.projectName.toLowerCase());
-          setProjects(filteredProjects);
-        } catch (error) {
-          console.error("Error fetching projects:", error);
-          toast.error("Gagal memuat data proyek");
-        }
-      };
-      fetchProjects();
-    }
-  }, [currentStep, formData.projectName]);
-
-  // Fetch ETH to IDR rate
   useEffect(() => {
     const fetchEthPrice = async () => {
       try {
         const apiKey = import.meta.env.VITE_COINGECKO_API_KEY;
-        let url = "https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=idr";
-        
+        let url =
+          "https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=idr";
         if (apiKey) {
           url = `https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=idr&x_cg_demo_api_key=${apiKey}`;
         }
-        
         const response = await fetch(url);
         const data = await response.json();
-        
         if (data.ethereum && data.ethereum.idr) {
           setEthToIdrRate(data.ethereum.idr);
         }
       } catch (error) {
         console.error("Error fetching ETH price:", error);
-        // Don't show error toast for price fetch, it's not critical
+        toast.error("Gagal memuat kurs konversi ETH ke IDR.");
       }
     };
-    
     fetchEthPrice();
   }, []);
 
-  // Calculate IDR value when ETH amount changes
   useEffect(() => {
-    if (formData.ethAmount && ethToIdrRate) {
-      const amountInEth = parseFloat(formData.ethAmount);
-      if (!isNaN(amountInEth) && amountInEth > 0) {
+    if (formData.budget && ethToIdrRate) {
+      const amountInEth = parseFloat(formData.budget);
+      if (!isNaN(amountInEth)) {
         const valueInIdr = amountInEth * ethToIdrRate;
         setIdrValue(
           new Intl.NumberFormat("id-ID", {
@@ -155,19 +138,10 @@ export default function UploadProposal() {
     } else {
       setIdrValue("");
     }
-  }, [formData.ethAmount, ethToIdrRate]);
+  }, [formData.budget, ethToIdrRate]);
 
   const handleInputChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
-    
-    // Clear validation error when user starts typing
-    if (validationErrors[field]) {
-      setValidationErrors(prev => {
-        const newErrors = { ...prev };
-        delete newErrors[field];
-        return newErrors;
-      });
-    }
   };
 
   const handleFileChange = (
@@ -175,102 +149,45 @@ export default function UploadProposal() {
     fileType: "document" | "image"
   ) => {
     const file = e.target.files?.[0];
-    if (!file) return;
-
-    // Validate file
-    const validationError = validateFile(file, fileType === "document" ? "pdf" : "image");
-    if (validationError) {
-      toast.error(validationError);
-      return;
-    }
-
-    if (fileType === "document") {
-      setDocumentFile(file);
-      toast.success("File proposal berhasil dipilih");
-    } else {
-      setImageFile(file);
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagePreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
-      toast.success("Gambar berhasil dipilih");
-    }
-
-    // Clear validation error
-    if (validationErrors[fileType]) {
-      setValidationErrors(prev => {
-        const newErrors = { ...prev };
-        delete newErrors[fileType];
-        return newErrors;
-      });
-    }
-  };
-
-  // Validation functions
-  const validateStep1 = (): boolean => {
-    const errors: Record<string, string> = {};
-
-    if (!formData.projectName.trim()) {
-      errors.projectName = "Nama proyek wajib diisi";
-    }
-
-    if (!formData.ethAmount) {
-      errors.ethAmount = "Jumlah dana wajib diisi";
-    } else {
-      const amount = parseFloat(formData.ethAmount);
-      if (isNaN(amount) || amount <= 0) {
-        errors.ethAmount = "Jumlah dana harus lebih dari 0";
+    if (file) {
+      if (fileType === "document") {
+        if (file.type === "application/pdf" && file.size <= 10 * 1024 * 1024) {
+          setDocumentFile(file);
+          toast.success("File proposal berhasil dipilih.");
+        } else {
+          toast.error("File dokumen harus PDF dan maksimal 10MB.");
+        }
+      } else {
+        if (
+          ["image/jpeg", "image/png"].includes(file.type) &&
+          file.size <= 5 * 1024 * 1024
+        ) {
+          setImageFile(file);
+          const reader = new FileReader();
+          reader.onloadend = () => {
+            setImagePreview(reader.result as string);
+          };
+          reader.readAsDataURL(file);
+          toast.success("Gambar berhasil dipilih.");
+        } else {
+          toast.error("File gambar harus JPG/PNG dan maksimal 5MB.");
+        }
       }
     }
-
-    if (!formData.regionId) {
-      errors.regionId = "Provinsi wajib dipilih";
-    }
-
-    if (!formData.address.trim()) {
-      errors.address = "Alamat wajib diisi";
-    }
-
-    if (!formData.category) {
-      errors.category = "Kategori proyek wajib dipilih";
-    }
-
-    if (!formData.description.trim()) {
-      errors.description = "Deskripsi proyek wajib diisi";
-    }
-
-    if (!imageFile) {
-      errors.image = "Foto proyek wajib diupload";
-    }
-
-    setValidationErrors(errors);
-    return Object.keys(errors).length === 0;
   };
 
-  const validateStep2 = (): boolean => {
-    const errors: Record<string, string> = {};
+  const isStep1Valid =
+    formData.judul &&
+    formData.budget &&
+    formData.region_id &&
+    formData.kategori &&
+    formData.alamat &&
+    formData.deskripsi &&
+    imageFile;
 
-    if (!documentFile) {
-      errors.document = "File proposal wajib diupload";
-    }
-    
-    if (!selectedProject) {
-      errors.project = "Proyek yang diajukan wajib dipilih";
-    }
-
-    setValidationErrors(errors);
-    return Object.keys(errors).length === 0;
-  };
+  const isStep2Valid = documentFile;
 
   const goToNextStep = () => {
-    if (currentStep === 1) {
-      if (!validateStep1()) {
-        toast.error("Harap lengkapi semua field yang diperlukan");
-        return;
-      }
-    }
-    
     if (currentStep < 3) {
       setCurrentStep(currentStep + 1);
     }
@@ -282,66 +199,114 @@ export default function UploadProposal() {
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+ const createProjectHandler = async (): Promise<number> => {
+  setIsCreatingProject(true);
+  try {
+    const projectFormData = new FormData();
     
-    if (!validateStep2()) {
-      toast.error("Harap upload file proposal dan pilih proyek yang diajukan.");
+    // Data project dengan region_id dari dropdown
+    projectFormData.append("judul", formData.judul);
+    projectFormData.append("kategori", formData.kategori);
+    projectFormData.append("deskripsi", formData.deskripsi);
+    projectFormData.append("budget", formData.budget);
+    projectFormData.append("alamat", formData.alamat);
+    projectFormData.append("region_id", formData.region_id);
+    
+    // Tambahkan status default yang valid sesuai backend
+    projectFormData.append("status", "belum dimulai");
+    
+    // File gambar
+    if (imageFile) {
+      projectFormData.append("gambar", imageFile);
+    }
+
+    console.log("Membuat proyek dengan data:", {
+      judul: formData.judul,
+      kategori: formData.kategori,
+      budget: formData.budget,
+      alamat: formData.alamat,
+      deskripsi: formData.deskripsi,
+      region_id: formData.region_id,
+      status: "belum dimulai"
+    });
+
+    const response = await createProject(projectFormData);
+    
+    console.log("Response dari backend:", response); // Debug log
+    
+    toast.success("Proyek berhasil dibuat!");
+    setCreatedProjectId(response.proyek.id); // Perbaikan di sini
+    return response.proyek.id; // Perbaikan di sini
+    
+  } catch (error: any) {
+    console.error("Create project error:", error);
+    
+    const errorMessage = error?.response?.data?.error || 
+                        error?.response?.data?.message || 
+                        error?.message || 
+                        "Terjadi kesalahan saat membuat proyek";
+    
+    toast.error(errorMessage);
+    throw error;
+  } finally {
+    setIsCreatingProject(false);
+  }
+};
+  const handleNextToStep2 = async () => {
+    if (!isStep1Valid) {
+      toast.error("Harap lengkapi semua data proyek");
       return;
     }
 
-    if (!imageFile || !documentFile) {
-      toast.error("File gambar dan proposal harus diupload");
+    try {
+      await createProjectHandler();
+      goToNextStep();
+    } catch (error) {
+      console.error('Error creating project:', error);
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!isStep2Valid) {
+      toast.error("Harap unggah dokumen proposal.");
+      return;
+    }
+
+    if (!documentFile || !createdProjectId) {
+      toast.error("File proposal harus diupload dan proyek harus sudah dibuat.");
       return;
     }
 
     setIsSubmitting(true);
 
     try {
-      // Buat FormData sesuai dengan yang diharapkan backend
-      const submitFormData = new FormData();
+      // Buat FormData untuk proposal
+      const proposalFormData = new FormData();
       
-      // Data project
-      submitFormData.append("judul", formData.projectName.trim());
-      submitFormData.append("kategori", formData.category);
-      submitFormData.append("deskripsi", formData.description.trim());
-      submitFormData.append("budget", formData.ethAmount);
-      submitFormData.append("alamat", formData.address.trim());
+      // Data proposal dengan project_id yang sudah dibuat
+      proposalFormData.append("project_id", createdProjectId.toString());
       
-      // Region ID
-      if (formData.regionId) {
-        submitFormData.append("region_id", formData.regionId);
-      }
-      
-      // Files
-      submitFormData.append("gambar", imageFile);
-      submitFormData.append("proposal", documentFile);
-      // Selected Project ID
-      submitFormData.append("project_id", selectedProject);
+      // File proposal
+      proposalFormData.append("proposal", documentFile);
 
-      console.log("Submitting form data:");
-      for (let pair of submitFormData.entries()) {
-        if (pair[1] instanceof File) {
-          console.log(`${pair[0]}: File - ${pair[1].name}`);
-        } else {
-          console.log(`${pair[0]}: ${pair[1]}`);
-        }
-      }
+      console.log("Mengajukan proposal untuk project ID:", createdProjectId);
 
-      const response = await uploadProposalAndProject(submitFormData);
+      const response = await uploadProposal(proposalFormData);
       
-      console.log("Response:", response);
-      
-      if (response.success) {
-        toast.success("Proposal berhasil diajukan! Menunggu review dari auditor.");
-        goToNextStep();
-      } else {
-        throw new Error(response.message || "Gagal mengajukan proposal");
-      }
+      toast.success("Proposal berhasil diajukan! Menunggu review dari auditor.");
+      goToNextStep();
       
     } catch (error: any) {
       console.error("Submit error:", error);
-      toast.error(error.message || "Terjadi kesalahan saat mengirim proposal");
+      
+      const errorMessage = error?.response?.data?.error || 
+                          error?.response?.data?.message || 
+                          error?.message || 
+                          "Terjadi kesalahan saat mengirim proposal";
+      
+      toast.error(errorMessage);
     } finally {
       setIsSubmitting(false);
     }
@@ -349,32 +314,23 @@ export default function UploadProposal() {
   
   const resetForm = () => {
     setFormData({
-      projectName: "",
-      ethAmount: "",
-      regionId: "",
-      address: "",
-      category: "",
-      description: "",
+      judul: "",
+      budget: "",
+      region_id: "",
+      kategori: "",
+      alamat: "",
+      deskripsi: "",
     });
     setDocumentFile(null);
     setImageFile(null);
     setImagePreview(null);
     setIdrValue("");
-    setValidationErrors({});
+    setCreatedProjectId(null);
     setCurrentStep(1);
-    setSelectedProject("");
   };
 
-  const renderValidationError = (field: string) => {
-    if (validationErrors[field]) {
-      return (
-        <p className="text-sm text-red-500 flex items-center gap-1 mt-1">
-          <AlertCircle className="w-4 h-4" />
-          {validationErrors[field]}
-        </p>
-      );
-    }
-    return null;
+  const handleBackToDashboard = () => {
+    navigate("/proposer/dashboard");
   };
 
   return (
@@ -420,12 +376,12 @@ export default function UploadProposal() {
 
         <div>
           <h1 className="text-3xl font-bold text-foreground mb-2 text-center">
-            {currentStep === 1 && "Lengkapi Detail Proposal"}
-            {currentStep === 2 && "Unggah Dokumen Pendukung"}
+            {currentStep === 1 && "Lengkapi Detail Proyek"}
+            {currentStep === 2 && "Unggah Dokumen Proposal"}
             {currentStep === 3 && "Pengajuan Berhasil"}
           </h1>
           <p className="text-muted-foreground text-center">
-            {currentStep === 1 && "Pastikan semua data sudah benar sebelum melanjutkan."}
+            {currentStep === 1 && "Pastikan semua data proyek sudah benar sebelum melanjutkan."}
             {currentStep === 2 && "Unggah proposal dalam format PDF."}
             {currentStep === 3 && "Proposal Anda telah berhasil diajukan dan akan segera ditinjau."}
           </p>
@@ -434,141 +390,147 @@ export default function UploadProposal() {
         <Card className="bg-gradient-card border-0 shadow-card">
           <CardContent className="p-8">
             <form onSubmit={handleSubmit} className="space-y-6">
-              {/* Step 1: Proposal Details & Image Upload */}
+              {/* Step 1: Project Details & Image Upload */}
               {currentStep === 1 && (
                 <>
                   <div className="space-y-2">
-                    <Label htmlFor="projectName">
-                      Nama Proyek <span className="text-red-500">*</span>
-                    </Label>
+                    <Label htmlFor="judul">Nama Proyek</Label>
                     <Input 
-                      id="projectName" 
+                      id="judul" 
                       placeholder="Contoh: Pembangunan Jembatan Desa Sukamaju" 
-                      value={formData.projectName} 
-                      onChange={(e) => handleInputChange("projectName", e.target.value)} 
-                      className={validationErrors.projectName ? "border-red-500" : ""}
+                      value={formData.judul} 
+                      onChange={(e) => handleInputChange("judul", e.target.value)} 
+                      required 
                     />
-                    {renderValidationError("projectName")}
                   </div>
                   
                   <div className="grid gap-6 md:grid-cols-2">
                     <div className="space-y-2">
-                      <Label htmlFor="ethAmount">
-                        Jumlah Dana (ETH) <span className="text-red-500">*</span>
-                      </Label>
+                      <Label htmlFor="budget">Jumlah Dana (ETH)</Label>
                       <div className="flex items-center gap-2">
                         <Input 
-                          id="ethAmount" 
+                          id="budget" 
                           type="number" 
-                          step="0.001" 
-                          min="0.001"
+                          step="0.01" 
                           placeholder="Contoh: 15" 
-                          value={formData.ethAmount} 
-                          onChange={(e) => handleInputChange("ethAmount", e.target.value)} 
-                          className={cn("w-40", validationErrors.ethAmount ? "border-red-500" : "")}
+                          value={formData.budget} 
+                          onChange={(e) => handleInputChange("budget", e.target.value)} 
+                          className="w-40" 
+                          required 
                         />
                         <span className="text-sm text-muted-foreground whitespace-nowrap">
-                          {idrValue ? `≈ ${idrValue}` : ethToIdrRate ? "≈ 0" : "Loading rate..."}
+                          {idrValue ? `≈ ${idrValue}` : "≈ 0"}
                         </span>
                       </div>
-                      {renderValidationError("ethAmount")}
                     </div>
                     
                     <div className="space-y-2">
-                      <Label htmlFor="category">
-                        Kategori Proyek <span className="text-red-500">*</span>
-                      </Label>
+                      <Label htmlFor="kategori">Kategori Proyek</Label>
                       <Select 
-                        value={formData.category} 
-                        onValueChange={(value) => handleInputChange("category", value)}
+                        value={formData.kategori} 
+                        onValueChange={(value) => handleInputChange("kategori", value)} 
+                        required
                       >
-                        <SelectTrigger className={validationErrors.category ? "border-red-500" : ""}>
+                        <SelectTrigger>
                           <SelectValue placeholder="Pilih kategori proyek" />
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="infrastruktur">Infrastruktur</SelectItem>
                           <SelectItem value="pendidikan">Pendidikan</SelectItem>
                           <SelectItem value="kesehatan">Kesehatan</SelectItem>
-                          <SelectItem value="pertahanan">Pertahanan</SelectItem>
-                          <SelectItem value="ekonomi">Ekonomi</SelectItem>
+                          <SelectItem value="pertanian">Pertanian</SelectItem>
+                          <SelectItem value="teknologi">Teknologi</SelectItem>
+                          <SelectItem value="sosial">Sosial</SelectItem>
                           <SelectItem value="lingkungan">Lingkungan</SelectItem>
                         </SelectContent>
                       </Select>
-                      {renderValidationError("category")}
                     </div>
                   </div>
                   
+                  {/* DROPDOWN PROVINSI DARI DATABASE */}
+                  {/* DROPDOWN PROVINSI DARI DATABASE */}
                   <div className="space-y-2">
-                    <Label htmlFor="region">
-                      Provinsi <span className="text-red-500">*</span>
-                    </Label>
+                    <Label htmlFor="region">Provinsi</Label>
                     <Select 
-                      value={formData.regionId} 
-                      onValueChange={(value) => handleInputChange("regionId", value)}
-                      disabled={isLoadingProvinces}
+                      value={formData.region_id} 
+                      onValueChange={(value) => handleInputChange("region_id", value)} 
+                      required
+                      disabled={isLoadingRegions || regions.length === 0}
                     >
-                      <SelectTrigger className={validationErrors.regionId ? "border-red-500" : ""}>
-                        <SelectValue 
-                          placeholder={isLoadingProvinces ? "Memuat provinsi..." : "Pilih provinsi..."} 
-                        />
+                      <SelectTrigger>
+                        <SelectValue placeholder={
+                          isLoadingRegions ? "Memuat data provinsi..." : 
+                          regions.length === 0 ? "Tidak ada data provinsi" : 
+                          "Pilih provinsi..."
+                        } />
                       </SelectTrigger>
                       <SelectContent>
-                        {provinces.map((province) => (
-                          <SelectItem key={province.id} value={province.id.toString()}>
-                            {province.nama_region}
+                        {regions.map((region) => (
+                          <SelectItem key={region.id} value={region.id.toString()}>
+                            {region.nama_region} {/* Perbaikan di sini */}
                           </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
-                    {renderValidationError("regionId")}
+                    
+                    {isLoadingRegions && (
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        <span>Sedang memuat data provinsi...</span>
+                      </div>
+                    )}
+                    
+                    {regionsError && (
+                      <div className="flex items-center gap-2 text-sm text-destructive">
+                        <AlertCircle className="h-4 w-4" />
+                        <span>{regionsError}</span>
+                      </div>
+                    )}
+                    
+                    {!isLoadingRegions && regions.length === 0 && !regionsError && (
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <AlertCircle className="h-4 w-4" />
+                        <span>Tidak ada data provinsi tersedia</span>
+                      </div>
+                    )}
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="address">
-                      Alamat <span className="text-red-500">*</span>
-                    </Label>
-                    <Input 
-                      id="address" 
-                      placeholder="Masukkan alamat lengkap proyek" 
-                      value={formData.address} 
-                      onChange={(e) => handleInputChange("address", e.target.value)} 
-                      className={validationErrors.address ? "border-red-500" : ""}
-                    />
-                    {renderValidationError("address")}
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="description">
-                      Deskripsi Singkat Proyek <span className="text-red-500">*</span>
-                    </Label>
+                    <Label htmlFor="alamat">Alamat Proyek</Label>
                     <Textarea 
-                      id="description" 
-                      placeholder="Jelaskan secara singkat tujuan dan ruang lingkup proyek ini." 
-                      value={formData.description} 
-                      onChange={(e) => handleInputChange("description", e.target.value)} 
-                      className={cn("min-h-[100px]", validationErrors.description ? "border-red-500" : "")}
+                      id="alamat" 
+                      placeholder="Masukkan alamat lengkap proyek" 
+                      value={formData.alamat} 
+                      onChange={(e) => handleInputChange("alamat", e.target.value)} 
+                      required 
                     />
-                    {renderValidationError("description")}
                   </div>
                   
                   <div className="space-y-2">
-                    <Label>
-                      Foto Prediksi Proyek <span className="text-red-500">*</span>
-                    </Label>
+                    <Label htmlFor="deskripsi">Deskripsi Singkat Proyek</Label>
+                    <Textarea 
+                      id="deskripsi" 
+                      placeholder="Jelaskan secara singkat tujuan dan ruang lingkup proyek ini." 
+                      value={formData.deskripsi} 
+                      onChange={(e) => handleInputChange("deskripsi", e.target.value)} 
+                      className="min-h-[100px]" 
+                      required 
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label>Foto Prediksi Proyek</Label>
                     <Input 
                       id="image-upload" 
                       type="file" 
                       ref={imageInputRef} 
                       onChange={(e) => handleFileChange(e, "image")} 
-                      accept="image/png,image/jpeg,image/jpg" 
+                      accept="image/png, image/jpeg" 
                       className="hidden" 
                     />
                     <div 
                       onClick={() => imageInputRef.current?.click()} 
-                      className={cn(
-                        "border-2 border-dashed rounded-lg p-4 text-center bg-muted/30 hover:bg-muted/50 cursor-pointer h-48 flex items-center justify-center transition-colors",
-                        validationErrors.image ? "border-red-500" : "border-border"
-                      )}
+                      className="border-2 border-dashed rounded-lg p-4 text-center bg-muted/30 hover:bg-muted/50 cursor-pointer h-48 flex items-center justify-center"
                     >
                       {imagePreview ? (
                         <img 
@@ -580,50 +542,28 @@ export default function UploadProposal() {
                         <div>
                           <ImageIcon className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
                           <p className="text-sm font-medium">Upload gambar (JPG/PNG)</p>
-                          <p className="text-xs text-muted-foreground mt-1">Maksimal 5MB</p>
                         </div>
                       )}
                     </div>
-                    {renderValidationError("image")}
                   </div>
                 </>
               )}
 
               {/* Step 2: PDF Upload */}
               {currentStep === 2 && (
-                <>
-                  <div className="space-y-2">
-                    <Label htmlFor="project-select">
-                      Proyek yang ingin diajukan <span className="text-red-500">*</span>
-                    </Label>
-                    <Select 
-                      value={selectedProject} 
-                      onValueChange={setSelectedProject}
-                    >
-                      <SelectTrigger className={validationErrors.project ? "border-red-500" : ""}>
-                        <SelectValue placeholder="Pilih proyek yang akan diajukan" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {projects.length > 0 ? (
-                          projects.map((project) => (
-                            <SelectItem key={project.id} value={project.id.toString()}>
-                              {project.judul}
-                            </SelectItem>
-                          ))
-                        ) : (
-                          <div className="px-2 py-1.5 text-sm text-muted-foreground">
-                            Tidak ada proyek yang sesuai.
-                          </div>
-                        )}
-                      </SelectContent>
-                    </Select>
-                    {renderValidationError("project")}
+                <div className="space-y-6">
+                  <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
+                    <div className="flex items-center gap-2 text-green-700">
+                      <CheckCircle className="h-5 w-5" />
+                      <p className="font-medium">Proyek berhasil dibuat!</p>
+                    </div>
+                    <p className="text-sm text-green-600 mt-1">
+                      ID Proyek: {createdProjectId}
+                    </p>
                   </div>
-
+                  
                   <div className="space-y-2">
-                    <Label>
-                      Dokumen Proposal (PDF) <span className="text-red-500">*</span>
-                    </Label>
+                    <Label>Dokumen Proposal (PDF)</Label>
                     <Input 
                       id="document-upload" 
                       type="file" 
@@ -634,18 +574,12 @@ export default function UploadProposal() {
                     />
                     <div 
                       onClick={() => documentInputRef.current?.click()} 
-                      className={cn(
-                        "border-2 border-dashed rounded-lg p-12 text-center bg-muted/30 hover:bg-muted/50 cursor-pointer transition-colors",
-                        validationErrors.document ? "border-red-500" : "border-border"
-                      )}
+                      className="border-2 border-dashed rounded-lg p-12 text-center bg-muted/30 hover:bg-muted/50 cursor-pointer"
                     >
                       {documentFile ? (
                         <div className="text-green-600 flex flex-col items-center gap-2">
                           <CheckCircle className="h-10 w-10" />
                           <p className="text-sm font-semibold">{documentFile.name}</p>
-                          <span className="text-xs text-muted-foreground">
-                            {(documentFile.size / (1024 * 1024)).toFixed(2)} MB
-                          </span>
                           <span className="text-xs text-muted-foreground">Klik untuk ganti file</span>
                         </div>
                       ) : (
@@ -656,29 +590,18 @@ export default function UploadProposal() {
                         </div>
                       )}
                     </div>
-                    {renderValidationError("document")}
                   </div>
-                </>
+                </div>
               )}
-
 
               {/* Step 3: Confirmation */}
               {currentStep === 3 && (
                 <div className="text-center py-12">
                   <CheckCircle className="w-24 h-24 text-green-500 mx-auto mb-6 animate-pulse" />
-                  <h2 className="text-2xl font-bold text-green-600 mb-4">Proposal Berhasil Dikirim!</h2>
-                  <p className="text-muted-foreground max-w-md mx-auto mb-6">
-                    Proposal Anda telah berhasil dikirim dan sedang menunggu review dari auditor. 
-                    Anda akan menerima notifikasi melalui email setelah proposal ditinjau.
+                  <p className="text-muted-foreground max-w-md mx-auto">
+                    Proposal Anda telah berhasil dikirim. Anda akan menerima notifikasi 
+                    setelah proposal ditinjau oleh auditor.
                   </p>
-                  <div className="bg-blue-50 dark:bg-blue-950 p-4 rounded-lg">
-                    <p className="text-sm text-blue-700 dark:text-blue-300">
-                      <strong>Apa selanjutnya?</strong><br />
-                      • Tim auditor akan meninjau proposal Anda dalam 3-5 hari kerja<br />
-                      • Anda dapat memantau status proposal di dashboard<br />
-                      • Jika disetujui, pendanaan akan segera diproses
-                    </p>
-                  </div>
                 </div>
               )}
 
@@ -692,16 +615,12 @@ export default function UploadProposal() {
                 )}
                 
                 {currentStep === 3 && (
-                  <div className="flex gap-3 mx-auto">
-                    <Button 
-                      type="button" 
-                      variant="outline" 
-                      onClick={() => navigate("/dashboard")}
-                    >
-                      Ke Dashboard
-                    </Button>
-                    <Button type="button" onClick={resetForm}>
+                  <div className="flex gap-4 mx-auto">
+                    <Button type="button" variant="outline" onClick={resetForm}>
                       Buat Proposal Baru
+                    </Button>
+                    <Button type="button" onClick={handleBackToDashboard}>
+                      Kembali ke Dashboard
                     </Button>
                   </div>
                 )}
@@ -709,16 +628,41 @@ export default function UploadProposal() {
                 <div />
                 
                 {currentStep === 1 && (
-                  <Button type="button" onClick={goToNextStep}>
-                    Lanjut ke Step 2
-                    <ArrowRight className="h-4 w-4 ml-2" />
+                  <Button 
+                    type="button" 
+                    onClick={handleNextToStep2} 
+                    disabled={!isStep1Valid || isCreatingProject}
+                  >
+                    {isCreatingProject ? (
+                      <>
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        Membuat Proyek...
+                      </>
+                    ) : (
+                      <>
+                        Lanjut ke Step 2
+                        <ArrowRight className="h-4 w-4 ml-2" />
+                      </>
+                    )}
                   </Button>
                 )}
                 
                 {currentStep === 2 && (
-                  <Button type="submit" disabled={isSubmitting}>
-                    <FileText className="h-4 w-4 mr-2" />
-                    {isSubmitting ? "Mengajukan..." : "Ajukan Proposal"}
+                  <Button 
+                    type="submit" 
+                    disabled={!isStep2Valid || isSubmitting}
+                  >
+                    {isSubmitting ? (
+                      <>
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        Mengajukan...
+                      </>
+                    ) : (
+                      <>
+                        <FileText className="h-4 w-4 mr-2" />
+                        Ajukan Proposal
+                      </>
+                    )}
                   </Button>
                 )}
               </div>

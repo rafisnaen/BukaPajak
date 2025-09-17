@@ -28,8 +28,7 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { ProposerLayout } from "../../components/proposer/ProposerLayout";
 import { cn } from "@/lib/utils";
-import { uploadProposalAndProject } from "@/api/proposal";
-
+import {uploadProposal } from "@/api/proposal";
 const STEPS = [
   { id: 1, title: "Detail Proposal" },
   { id: 2, title: "Unggah Dokumen" },
@@ -207,7 +206,7 @@ export default function UploadProposal() {
         console.log(pair[0], pair[1]);
       }
 
-      const response = await uploadProposalAndProject(submitFormData);
+      const response = await uploadProposal(submitFormData);
       
       console.log("Response:", response);
       

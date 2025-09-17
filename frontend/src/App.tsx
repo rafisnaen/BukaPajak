@@ -10,8 +10,8 @@ import NotFound from "./pages/NotFound";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import DashboardPage from "./pages/DashboardPage";
-import Regional from "./pages/Regional";
-import Transparansi from "./pages/Transparansi";
+// import Regional from "./pages/Regional";
+// import Transparansi from "./pages/Transparansi";
 import Tentang from "./pages/Tentang";
 import DoubleVerifierPage from "./pages/DoubleVerifierPage"; // Impor halaman baru
 
@@ -48,9 +48,9 @@ const App = () => (
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/dashboard" element={<DashboardPage />} />
-          <Route path="/regional" element={<Regional />} />
-          <Route path="/transparansi/:provinceId" element={<Transparansi />} />
-          <Route path="/transparansi" element={<Transparansi />} />
+          {/* <Route path="/regional" element={<Regional />} /> */}
+          {/* <Route path="/transparansi/:provinceId" element={<Transparansi />} />
+          <Route path="/transparansi" element={<Transparansi />} /> */}
           <Route path="/tentang" element={<Tentang />} />
 
           {/* --- Rute Verifikasi (Protected) --- */}

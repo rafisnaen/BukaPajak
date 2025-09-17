@@ -1,5 +1,5 @@
 // src/utils/projectMappers.ts
-import { ApiProject } from "@/api/projectApi";
+import { ApiProject } from "@/api/project";
 import { ProjectDetail } from "@/components/ui/ProjectDetailDialog";
 export const mapApiProjectToCard = (project: ApiProject): ProjectDetail => {
   // Normalize status
