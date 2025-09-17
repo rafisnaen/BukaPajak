@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Shield, Users, TrendingUp, Globe } from "lucide-react";
-import heroImage from "@/assets/hero-bg.svg";
+import djpImage from "@/assets/djp-ri.svg";
 
 const HeroSection = () => {
   return (
@@ -9,7 +9,7 @@ const HeroSection = () => {
       {/* Background Image Overlay */}
       <div 
         className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-20"
-        style={{ backgroundImage: `url(${heroImage})` }}
+        style={{ backgroundImage: `url(${djpImage})` }}
       />
       
       {/* Hero Content */}
