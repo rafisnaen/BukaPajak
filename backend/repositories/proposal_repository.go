@@ -189,3 +189,19 @@ func GetAllProposalsWithDetail() ([]models.ProposalWithDetail, error) {
 
 	return result, nil
 }
+
+func LogProposalDownload(proposalID, userID int64, gatewayUsed, clientIP string) error {
+	data := map[string]interface{}{
+		"proposal_id":  proposalID,
+		"user_id":      userID,
+		"gateway_used": gatewayUsed,
+		"client_ip":    clientIP,
+	}
+
+	_, _, err := configs.Supabase.
+		From("proposal_downloads").
+		Insert(data, false, "", "", "").
+		Execute()
+
+	return err
+}
