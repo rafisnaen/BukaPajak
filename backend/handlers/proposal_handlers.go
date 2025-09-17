@@ -194,3 +194,16 @@ func GetProposalByIDHandler(c *gin.Context) {
 
 	c.JSON(http.StatusOK, proposal)
 }
+
+func GetAllProposalsWithDetailHandler(c *gin.Context) {
+	proposals, err := repositories.GetAllProposalsWithDetail()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error":   "Failed to fetch proposals with detail",
+			"details": err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, proposals)
+}

@@ -115,3 +115,77 @@ func GetProposalByID(id int64) (models.Proposal, error) {
 
 	return proposals[0], nil
 }
+
+func GetAllProposalsWithDetail() ([]models.ProposalWithDetail, error) {
+	// Ambil proposals
+	dataProposals, _, err := configs.Supabase.
+		From("proposals").
+		Select("*", "", false).
+		Execute()
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch proposals: %w", err)
+	}
+	var proposals []models.Proposal
+	if err := json.Unmarshal(dataProposals, &proposals); err != nil {
+		return nil, err
+	}
+
+	// Ambil proyek
+	dataProyek, _, err := configs.Supabase.
+		From("proyek").
+		Select("*", "", false).
+		Execute()
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch proyek: %w", err)
+	}
+	var proyekList []models.Proyek
+	if err := json.Unmarshal(dataProyek, &proyekList); err != nil {
+		return nil, err
+	}
+	proyekMap := make(map[int64]models.Proyek)
+	for _, p := range proyekList {
+		proyekMap[p.ID] = p
+	}
+
+	// Ambil region
+	dataRegion, _, err := configs.Supabase.
+		From("region_data").
+		Select("*", "", false).
+		Execute()
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch region: %w", err)
+	}
+	var regionList []models.Region
+	if err := json.Unmarshal(dataRegion, &regionList); err != nil {
+		return nil, err
+	}
+	regionMap := make(map[int64]string)
+	for _, r := range regionList {
+		regionMap[r.ID] = r.NamaRegion
+	}
+
+	// Gabungkan data
+	var result []models.ProposalWithDetail
+	for _, proposal := range proposals {
+		proyek, ok := proyekMap[proposal.ProjectID]
+		if !ok {
+			continue
+		}
+
+		regionName := ""
+		if proyek.RegionID != nil {
+			regionName = regionMap[*proyek.RegionID]
+		}
+
+		result = append(result, models.ProposalWithDetail{
+			Proposal:    proposal,
+			ProjectName: proyek.Judul,
+			Region:      regionName,
+			Budget:      proyek.Budget,
+			Kategori:    &proyek.Kategori,
+			Alamat:      &proyek.Alamat,
+		})
+	}
+
+	return result, nil
+}

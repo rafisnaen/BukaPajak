@@ -11,3 +11,12 @@ type Proposal struct {
 	UserID         int64     `json:"user_id"`
 	ProjectID      int64     `json:"project_id"`
 }
+type ProposalWithDetail struct {
+	Proposal
+	ProjectName string  `json:"project_name"`
+	Region      string  `json:"region"`
+	Budget      float64 `json:"budget"`
+	Kategori    *string `json:"kategori"`
+	Alamat      *string `json:"alamat"`
+	Pengusul    string  `json:"pengusul"`
+}

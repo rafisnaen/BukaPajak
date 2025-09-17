@@ -121,6 +121,7 @@ func ProposalRoutes(r *gin.Engine) {
 
 		// Rute untuk mendapatkan detail proposal berdasarkan ID
 		api.GET("/proposals/:id", handlers.GetProposalByIDHandler)
+		api.GET("/proposals/projects", handlers.GetAllProposalsWithDetailHandler)
 	}
 }
 
