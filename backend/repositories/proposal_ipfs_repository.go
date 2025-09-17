@@ -7,12 +7,27 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"strings"
 )
 
 // ✅ Insert proposal dan langsung return row dari Supabase
 func CreateProposal_IPFS(proposal models.Proposal) (models.Proposal, error) {
+	// Ambil CID dari file_url
+	var cid string
+	parts := strings.Split(proposal.FileURL, "/ipfs/")
+	if len(parts) == 2 {
+		cid = parts[1]
+	}
+
+	gatewayURL := ""
+	if cid != "" {
+		gatewayURL = "https://gateway.pinata.cloud/ipfs/" + cid
+	}
+
 	data := map[string]interface{}{
 		"file_url":        proposal.FileURL,
+		"cid":             cid,
+		"gateway_url":     gatewayURL,
 		"status_proposal": proposal.StatusProposal,
 		"user_id":         proposal.UserID,
 		"project_id":      proposal.ProjectID,
