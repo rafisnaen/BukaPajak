@@ -38,3 +38,7 @@ export const getProposalById = async (id: number): Promise<Proposal> => {
   const response = await api.get(`/api/v1/proposals/${id}`); // Sesuai dengan /proposals/:id di backend
   return response.data;
 };
+export const getAllProposalsProjects = async (): Promise<Proposal[]> => {
+  const response = await api.get('/api/v1/proposals/projects'); // Sesuai dengan /proposals di backend
+  return response.data;
+};
