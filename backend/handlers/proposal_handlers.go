@@ -263,3 +263,48 @@ func GetProposalWithDetailByIDHandler(c *gin.Context) {
 
 	c.JSON(http.StatusOK, proposal)
 }
+
+func RejectProposalHandler(c *gin.Context) {
+	// Ambil ID proposal dari URL
+	idStr := c.Param("id")
+	id, err := strconv.ParseInt(idStr, 10, 64)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid proposal ID"})
+		return
+	}
+
+	// Update status menjadi "ditolak"
+	updated, err := repositories.UpdateProposalStatus(id, "ditolak")
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Gagal menolak proposal", "details": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "Proposal berhasil ditolak",
+		"data":    updated,
+	})
+}
+
+// POST /proposal/:id/accept
+func AcceptProposalHandler(c *gin.Context) {
+	// Ambil ID proposal dari URL
+	idStr := c.Param("id")
+	id, err := strconv.ParseInt(idStr, 10, 64)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid proposal ID"})
+		return
+	}
+
+	// Update status menjadi "disetujui"
+	updated, err := repositories.UpdateProposalStatus(id, "disetujui")
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Gagal menyetujui proposal", "details": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "Proposal berhasil disetujui",
+		"data":    updated,
+	})
+}
