@@ -29,9 +29,8 @@ import { toast } from "sonner";
 import { ProposerLayout } from "../../components/proposer/ProposerLayout";
 import { cn } from "@/lib/utils";
 import { createProject } from "@/api/project";
-import { uploadProposal } from "@/api/proposal";
 import { getAllRegions, Region } from "@/api/region";
-
+import { uploadProposal_IPFS } from "@/api/proposal";
 const STEPS = [
   { id: 1, title: "Detail Proyek" },
   { id: 2, title: "Unggah Dokumen Proposal" },
@@ -293,7 +292,8 @@ export default function NewProposalPage() {
 
       console.log("Mengajukan proposal untuk project ID:", createdProjectId);
 
-      const response = await uploadProposal(proposalFormData);
+      // Menggunakan uploadProposal_IPS sebagai ganti uploadProposal
+      const response = await uploadProposal_IPFS(proposalFormData);
       
       toast.success("Proposal berhasil diajukan! Menunggu review dari auditor.");
       goToNextStep();
@@ -438,16 +438,12 @@ export default function NewProposalPage() {
                           <SelectItem value="infrastruktur">Infrastruktur</SelectItem>
                           <SelectItem value="pendidikan">Pendidikan</SelectItem>
                           <SelectItem value="kesehatan">Kesehatan</SelectItem>
-                          <SelectItem value="pertanian">Pertanian</SelectItem>
-                          <SelectItem value="teknologi">Teknologi</SelectItem>
-                          <SelectItem value="sosial">Sosial</SelectItem>
-                          <SelectItem value="lingkungan">Lingkungan</SelectItem>
+                          <SelectItem value="pertahanan">Pertahanan</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
                   </div>
                   
-                  {/* DROPDOWN PROVINSI DARI DATABASE */}
                   {/* DROPDOWN PROVINSI DARI DATABASE */}
                   <div className="space-y-2">
                     <Label htmlFor="region">Provinsi</Label>

@@ -241,3 +241,25 @@ func DownloadProposalHandler(c *gin.Context) {
 		CID:     proposal.CID,
 	})
 }
+
+func GetProposalWithDetailByIDHandler(c *gin.Context) {
+	idParam := c.Param("id")
+	proposalID, err := strconv.ParseInt(idParam, 10, 64)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "Invalid proposal ID",
+		})
+		return
+	}
+
+	proposal, err := repositories.GetProposalWithDetailByID(proposalID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error":   "Failed to fetch proposal with detail",
+			"details": err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, proposal)
+}

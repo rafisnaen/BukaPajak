@@ -1,157 +1,510 @@
-import { AuditorLayout } from "@/components/auditor/AuditorLayout";
-import { Badge } from "@/components/ui/badge";
+// src/pages/auditor/ReviewPage.tsx
+import { useState, useEffect } from "react";
+import { useParams, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { ArrowLeft, Check, Download, Info, X } from "lucide-react";
-import { useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
+import { 
+  AlertCircle, 
+  ArrowLeft, 
+  Download, 
+  Loader2, 
+  FileText,
+  Calendar,
+  MapPin,
+  User,
+  DollarSign,
+  FolderOpen,
+  CheckCircle2,
+  XCircle,
+  Clock,
+  ExternalLink,
+  Building2
+} from "lucide-react";
 import { toast } from "sonner";
-
-// Data ini nantinya akan diambil dari API berdasarkan ID di URL
-const mockProposalDetail = {
-    id: '2', 
-    title: 'Perbaikan Jalan Utama Rawa Belong', 
-    amount: 15, 
-    submissionDate: '1 September 2025', 
-    proposer: 'Dinas PU DKI Jakarta',
-    proposerWallet: '0x3B921248c937D100d566Cf78d115eb9612bc7d14',
-    projectType: 'Infrastruktur',
-    description: 'Proyek ini bertujuan untuk melakukan pengaspalan ulang jalan utama di daerah Rawa Belong sepanjang 2km yang saat ini dalam kondisi rusak berat. Pengaspalan akan menggunakan material kualitas tinggi untuk memastikan daya tahan jalan hingga 10 tahun ke depan. Dana akan digunakan untuk material, alat berat, dan tenaga kerja.',
-    ipfsHash: 'QmXyZAbc...', // Hash IPFS dari dokumen proposal
-};
-
+import { getProposalWithDetails, Proposal } from "@/api/proposal";
+import { formatLongDate } from "@/utils/dateFormatter";
 
 const AuditorReviewPage = () => {
-    const { proposalId } = useParams();
-    const [isRejectModalOpen, setRejectModalOpen] = useState(false);
-    const [rejectionReason, setRejectionReason] = useState("");
+  const { id } = useParams<{ id: string }>();
+  const [proposal, setProposal] = useState<Proposal | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-    const handleApprove = () => {
-        toast.success(`Proposal #${proposalId} disetujui!`, {
-            description: "Status proposal telah diperbarui dan notifikasi dikirim ke pengusul.",
-        });
-        // Panggil API backend untuk memicu transaksi 'approveProposal'
+  useEffect(() => {
+    const fetchProposalData = async () => {
+      if (!id) {
+        setError("ID proposal tidak ditemukan");
+        setIsLoading(false);
+        return;
+      }
+
+      try {
+        setIsLoading(true);
+        setError(null);
+
+        const proposalData = await getProposalWithDetails(Number(id));
+        console.log("Fetched proposal data:", proposalData);
+        setProposal(proposalData);
+      } catch (error: any) {
+        console.error("Error fetching proposal:", error);
+        const errorMessage =
+          error.response?.data?.error ||
+          error.response?.data?.message ||
+          error.message ||
+          "Gagal memuat data proposal";
+        setError(errorMessage);
+        toast.error(errorMessage);
+      } finally {
+        setIsLoading(false);
+      }
     };
 
-    const handleRejectSubmit = () => {
-        if (!rejectionReason.trim()) {
-            toast.error("Alasan penolakan tidak boleh kosong.");
-            return;
-        }
-        
-        toast.info(`Proposal #${proposalId} ditolak.`, {
-            description: `Alasan: ${rejectionReason}`,
-        });
-        // Panggil API backend untuk memicu transaksi 'rejectProposal'
-        
-        setRejectModalOpen(false);
-        setRejectionReason("");
-    };
+    fetchProposalData();
+  }, [id]);
 
+  const handleDownload = () => {
+    if (proposal?.file_url) {
+      window.open(proposal.file_url, "_blank");
+      toast.success("Membuka file proposal...");
+    } else {
+      toast.error("File URL tidak tersedia");
+    }
+  };
+
+  const handleApprove = () => {
+    toast.success("Proposal telah disetujui!");
+  };
+
+  const handleReject = () => {
+    toast.error("Proposal telah ditolak!");
+  };
+
+  const getStatusConfig = (status: string) => {
+    switch (status.toLowerCase()) {
+      case "disetujui":
+        return {
+          variant: "default" as const,
+          text: "Disetujui",
+          icon: CheckCircle2,
+          className: "bg-emerald-100 text-emerald-800 border-emerald-300"
+        };
+      case "ditolak":
+        return {
+          variant: "destructive" as const,
+          text: "Ditolak",
+          icon: XCircle,
+          className: "bg-red-100 text-red-800 border-red-300"
+        };
+      case "menunggu":
+        return {
+          variant: "secondary" as const,
+          text: "Menunggu Review",
+          icon: Clock,
+          className: "bg-amber-50 text-amber-800 border-amber-300"
+        };
+      default:
+        return {
+          variant: "secondary" as const,
+          text: status,
+          icon: Clock,
+          className: "bg-gray-100 text-gray-700 border-gray-300"
+        };
+    }
+  };
+
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('id-ID', {
+      style: 'currency',
+      currency: 'IDR',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
+    }).format(amount);
+  };
+
+  if (isLoading) {
     return (
-        <AuditorLayout>
-            <div>
-                {/* Navigasi Kembali */}
-                <Link to="/auditor/dashboard" className="inline-flex items-center text-sm font-medium text-gray-600 hover:text-gray-900 mb-6">
-                    <ArrowLeft className="mr-2 h-4 w-4" />
-                    Kembali ke Antrian Review
-                </Link>
-
-                {/* Header Halaman */}
-                <div className="flex justify-between items-start mb-6">
-                    <div>
-                        <h1 className="text-3xl font-bold text-gray-800">{mockProposalDetail.title}</h1>
-                        <p className="text-gray-500 mt-1">Diajukan oleh: {mockProposalDetail.proposer}</p>
-                    </div>
-                    <Badge variant="outline">Menunggu Review</Badge>
+      <div className="min-h-screen" style={{ background: 'linear-gradient(135deg, #F7F7F7 0%, #FCC61D 25%, #C59560 75%, #3338A0 100%)' }}>
+        <div className="container mx-auto p-6">
+          <div className="flex items-center justify-center min-h-96">
+            <Card className="p-8 shadow-2xl border-0" style={{ backgroundColor: '#F7F7F7' }}>
+              <div className="flex flex-col items-center gap-4 text-center">
+                <div className="relative">
+                  <Loader2 className="h-12 w-12 animate-spin" style={{ color: '#3338A0' }} />
+                  <div className="absolute inset-0 rounded-full opacity-20 animate-pulse" style={{ backgroundColor: '#3338A0' }}></div>
                 </div>
-
-                {/* Tombol Aksi Utama */}
-                <Card className="mb-6">
-                    <CardHeader>
-                        <CardTitle>Tindakan Audit</CardTitle>
-                        <CardDescription>Setelah mereview semua detail, berikan persetujuan atau penolakan.</CardDescription>
-                    </CardHeader>
-                    <CardContent className="flex space-x-4">
-                        <Button onClick={handleApprove} className="bg-green-600 hover:bg-green-700">
-                            <Check className="mr-2 h-4 w-4" />
-                            Approve Proposal
-                        </Button>
-                        <Button onClick={() => setRejectModalOpen(true)} variant="destructive">
-                            <X className="mr-2 h-4 w-4" />
-                            Reject Proposal
-                        </Button>
-                    </CardContent>
-                </Card>
-
-                {/* Detail Proposal */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div className="md:col-span-2">
-                        <Card>
-                            <CardHeader><CardTitle>Deskripsi Proyek</CardTitle></CardHeader>
-                            <CardContent>
-                                <p className="text-gray-700 leading-relaxed">{mockProposalDetail.description}</p>
-                            </CardContent>
-                        </Card>
-                    </div>
-                    <div>
-                        <Card>
-                            <CardHeader><CardTitle>Informasi Kunci</CardTitle></CardHeader>
-                            <CardContent className="space-y-4 text-sm">
-                                <InfoItem label="Jumlah Dana" value={`${mockProposalDetail.amount} ETH`} />
-                                <InfoItem label="Kategori" value={mockProposalDetail.projectType} />
-                                <InfoItem label="Tanggal Pengajuan" value={mockProposalDetail.submissionDate} />
-                                <InfoItem label="Wallet Pengusul" value={`${mockProposalDetail.proposerWallet.substring(0,10)}...`} isMono/>
-                                <Button className="w-full mt-4" variant="outline" asChild>
-                                    <a href={`https://ipfs.io/ipfs/${mockProposalDetail.ipfsHash}`} target="_blank" rel="noopener noreferrer">
-                                        <Download className="mr-2 h-4 w-4"/>
-                                        Lihat Dokumen Proposal (IPFS)
-                                    </a>
-                                </Button>
-                            </CardContent>
-                        </Card>
-                    </div>
+                <div>
+                  <h3 className="text-lg font-semibold" style={{ color: '#3338A0' }}>Memuat Data Proposal</h3>
+                  <p className="text-sm text-gray-600 mt-1">Mohon tunggu sebentar...</p>
                 </div>
-            </div>
-
-            {/* Dialog untuk Alasan Penolakan */}
-            <Dialog open={isRejectModalOpen} onOpenChange={setRejectModalOpen}>
-                <DialogContent>
-                    <DialogHeader>
-                        <DialogTitle>Konfirmasi Penolakan Proposal</DialogTitle>
-                        <DialogDescription>
-                            Harap berikan alasan yang jelas mengapa proposal ini ditolak. Alasan ini akan dikirimkan kepada pengusul.
-                        </DialogDescription>
-                    </DialogHeader>
-                    <div className="py-4 space-y-2">
-                        <Label htmlFor="rejection-reason" className="sr-only">Alasan Penolakan</Label>
-                        <Textarea
-                            id="rejection-reason"
-                            value={rejectionReason}
-                            onChange={(e) => setRejectionReason(e.target.value)}
-                            placeholder="Contoh: Anggaran tidak realistis, deskripsi proyek kurang detail, dll."
-                            className="min-h-[120px]"
-                        />
-                    </div>
-                    <DialogFooter>
-                        <Button variant="ghost" onClick={() => setRejectModalOpen(false)}>Batal</Button>
-                        <Button variant="destructive" onClick={handleRejectSubmit}>Kirim Penolakan</Button>
-                    </DialogFooter>
-                </DialogContent>
-            </Dialog>
-        </AuditorLayout>
+              </div>
+            </Card>
+          </div>
+        </div>
+      </div>
     );
-};
+  }
 
-// Komponen kecil untuk menampilkan item info
-const InfoItem = ({ label, value, isMono = false }: { label: string, value: string, isMono?: boolean }) => (
-    <div className="flex justify-between">
-        <span className="text-muted-foreground">{label}</span>
-        <span className={`font-semibold ${isMono ? 'font-mono' : ''}`}>{value}</span>
+  if (error) {
+    return (
+      <div className="min-h-screen" style={{ background: 'linear-gradient(135deg, #F7F7F7 0%, #FCC61D 25%, #C59560 75%, #3338A0 100%)' }}>
+        <div className="container mx-auto p-6">
+          <div className="flex items-center justify-center min-h-96">
+            <Card className="p-8 shadow-2xl border-0 max-w-md w-full" style={{ backgroundColor: '#F7F7F7' }}>
+              <div className="flex flex-col items-center gap-6 text-center">
+                <div className="p-4 rounded-full" style={{ backgroundColor: '#FEF2F2' }}>
+                  <AlertCircle className="h-12 w-12 text-red-600" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-semibold mb-2" style={{ color: '#3338A0' }}>Oops! Terjadi Kesalahan</h3>
+                  <p className="text-gray-600 mb-4">{error}</p>
+                </div>
+                <Link to="/auditor/dashboard" className="w-full">
+                  <Button 
+                    variant="outline" 
+                    className="w-full border-2 hover:shadow-lg transition-all duration-200"
+                    style={{ 
+                      borderColor: '#3338A0', 
+                      color: '#3338A0',
+                      backgroundColor: 'transparent'
+                    }}
+                  >
+                    <ArrowLeft className="mr-2 h-4 w-4" />
+                    Kembali ke Dashboard
+                  </Button>
+                </Link>
+              </div>
+            </Card>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!proposal) {
+    return (
+      <div className="min-h-screen" style={{ background: 'linear-gradient(135deg, #F7F7F7 0%, #FCC61D 25%, #C59560 75%, #3338A0 100%)' }}>
+        <div className="container mx-auto p-6">
+          <div className="flex items-center justify-center min-h-96">
+            <Card className="p-8 shadow-2xl border-0 max-w-md w-full" style={{ backgroundColor: '#F7F7F7' }}>
+              <div className="flex flex-col items-center gap-6 text-center">
+                <div className="p-4 rounded-full bg-gray-100">
+                  <FileText className="h-12 w-12 text-gray-400" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-semibold mb-2" style={{ color: '#3338A0' }}>Proposal Tidak Ditemukan</h3>
+                  <p className="text-gray-600 mb-4">Proposal yang Anda cari tidak tersedia</p>
+                </div>
+                <Link to="/auditor/dashboard" className="w-full">
+                  <Button 
+                    variant="outline" 
+                    className="w-full border-2 hover:shadow-lg transition-all duration-200"
+                    style={{ 
+                      borderColor: '#3338A0', 
+                      color: '#3338A0',
+                      backgroundColor: 'transparent'
+                    }}
+                  >
+                    <ArrowLeft className="mr-2 h-4 w-4" />
+                    Kembali ke Dashboard
+                  </Button>
+                </Link>
+              </div>
+            </Card>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  const statusConfig = getStatusConfig(proposal.status || "menunggu");
+  const StatusIcon = statusConfig.icon;
+
+  return (
+    <div className="min-h-screen" style={{ background: '#F7F7F7' }}>
+      <div className="container mx-auto p-6 space-y-8">
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="flex items-center gap-4">
+            <Link to="/auditor/dashboard">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="shadow-lg hover:shadow-xl transition-all duration-200 border-2"
+                style={{ 
+                  borderColor: '#3338A0', 
+                  color: '#3338A0',
+                  backgroundColor: '#F7F7F7'
+                }}
+              >
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                Kembali
+              </Button>
+            </Link>
+            <div>
+              <h1 className="text-3xl font-bold" style={{ color: '#3338A0' }}>Review Proposal</h1>
+              <p className="text-gray-600 mt-1">ID: #{proposal.id}</p>
+            </div>
+          </div>
+          {proposal.file_url && (
+            <Button 
+              onClick={handleDownload} 
+              className="shadow-lg hover:shadow-xl transition-all duration-200"
+              style={{ 
+                background: '#424242',
+                color: 'white',
+                border: 'none'
+              }}
+            >
+              <Download className="mr-2 h-4 w-4" />
+              Download Proposal
+            </Button>
+          )}
+        </div>
+
+        {/* Status Banner */}
+        <Card className="border-0 shadow-2xl" style={{ backgroundColor: '#F7F7F7' }}>
+          <CardContent className="p-6">
+            <div className="flex items-center gap-4">
+              <div className={`p-3 rounded-full ${statusConfig.className}`}>
+                <StatusIcon className="h-6 w-6" />
+              </div>
+              <div className="flex-1">
+                <h3 className="font-semibold text-lg" style={{ color: '#3338A0' }}>Status Proposal</h3>
+                <Badge variant={statusConfig.variant} className={`mt-2 text-sm px-3 py-1 ${statusConfig.className}`}>
+                  {statusConfig.text}
+                </Badge>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
+          {/* Main Content */}
+          <div className="xl:col-span-2 space-y-6">
+            {/* Project Information */}
+            <Card className="shadow-2xl hover:shadow-3xl transition-shadow duration-300 border-0 overflow-hidden">
+              <CardHeader 
+                className="text-white"
+                style={{ background: '#424242' }}
+              >
+                <CardTitle className="flex items-center gap-2 text-lg">
+                  <Building2 className="h-5 w-5" />
+                  Informasi Proyek
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-6 space-y-6" style={{ backgroundColor: '#F7F7F7' }}>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <label className="flex items-center gap-2 text-sm font-medium text-gray-600">
+                      <FileText className="h-4 w-4" />
+                      Nama Proyek
+                    </label>
+                    <p className="font-semibold text-lg" style={{ color: '#3338A0' }}>{proposal.project_name || "N/A"}</p>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="flex items-center gap-2 text-sm font-medium text-gray-600">
+                      <User className="h-4 w-4" />
+                      Pengusul
+                    </label>
+                    <p className="font-semibold text-lg" style={{ color: '#3338A0' }}>{proposal.region || "N/A"}</p>
+                  </div>
+                </div>
+                
+                <Separator style={{ backgroundColor: '#C59560', height: '2px' }} />
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <label className="flex items-center gap-2 text-sm font-medium text-gray-600">
+                      <FolderOpen className="h-4 w-4" />
+                      Kategori
+                    </label>
+                    <Badge 
+                      variant="outline" 
+                      className="w-fit text-sm px-3 py-1 border-2"
+                      style={{ 
+                        borderColor: '#FCC61D',
+                        color: '#C59560',
+                        backgroundColor: '#FFFBEB'
+                      }}
+                    >
+                      {proposal.kategori || "N/A"}
+                    </Badge>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="flex items-center gap-2 text-sm font-medium text-gray-600">
+                      <MapPin className="h-4 w-4" />
+                      Alamat
+                    </label>
+                    <p className="text-gray-700">{proposal.alamat || "N/A"}</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Budget & Technical Info */}
+            <Card className="shadow-2xl hover:shadow-3xl transition-shadow duration-300 border-0 overflow-hidden">
+              <CardHeader 
+                className="text-white"
+                style={{ background: '#424242' }}
+              >
+                <CardTitle className="flex items-center gap-2 text-lg">
+                  <DollarSign className="h-5 w-5" />
+                  Informasi Anggaran & Teknis
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-6" style={{ backgroundColor: '#F7F7F7' }}>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div 
+                    className="p-6 rounded-xl border-2 shadow-lg"
+                    style={{ 
+                      background: 'white',
+                      borderColor: '#22C55E'
+                    }}
+                  >
+                    <label className="flex items-center gap-2 text-sm font-medium text-emerald-700 mb-3">
+                      <DollarSign className="h-4 w-4" />
+                      Total Anggaran
+                    </label>
+                    <p className="text-2xl font-bold text-emerald-800">
+                      {proposal.budget ? formatCurrency(proposal.budget) : "N/A"}
+                    </p>
+                  </div>
+                  <div 
+                    className="p-6 rounded-xl border-2 shadow-lg"
+                    style={{ 
+                      background: 'white',
+                      borderColor: '#3338A0'
+                    }}
+                  >
+                    <label className="flex items-center gap-2 text-sm font-medium mb-3" style={{ color: '#3338A0' }}>
+                      <FileText className="h-4 w-4" />
+                      Project ID
+                    </label>
+                    <p className="text-xl font-bold" style={{ color: '#3338A0' }}>
+                      #{proposal.project_id || proposal.id}
+                    </p>
+                  </div>
+                </div>
+                {proposal.cid && (
+                  <div className="mt-6 p-4 rounded-lg border-2" style={{ backgroundColor: 'white', borderColor: '#C59560' }}>
+                    <label className="flex items-center gap-2 text-sm font-medium mb-2" style={{ color: '#C59560' }}>
+                      <FileText className="h-4 w-4" />
+                      Content Identifier (CID)
+                    </label>
+                    <p className="text-sm font-mono text-gray-600 break-all bg-gray-50 p-3 rounded border">
+                      {proposal.cid}
+                    </p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Sidebar */}
+          <div className="space-y-6">
+            {/* Timeline */}
+            <Card className="shadow-2xl hover:shadow-3xl transition-shadow duration-300 border-0 overflow-hidden">
+              <CardHeader 
+                className="text-white"
+                style={{ background: '#424242' }}
+              >
+                <CardTitle className="flex items-center gap-2 text-lg">
+                  <Calendar className="h-5 w-5" />
+                  Timeline
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-6 space-y-4" style={{ backgroundColor: '#F7F7F7' }}>
+                <div className="flex items-start gap-3">
+                  <div className="w-3 h-3 rounded-full mt-2" style={{ backgroundColor: '#3338A0' }}></div>
+                  <div className="flex-1">
+                    <p className="text-sm font-medium" style={{ color: '#3338A0' }}>Diajukan</p>
+                    <p className="text-sm text-gray-600">{formatLongDate(proposal.created_at)}</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className="w-3 h-3 rounded-full mt-2" style={{ backgroundColor: '#FCC61D' }}></div>
+                  <div className="flex-1">
+                    <p className="text-sm font-medium" style={{ color: '#C59560' }}>Terakhir Update</p>
+                    <p className="text-sm text-gray-600">{formatLongDate(proposal.updated_at)}</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* File Information */}
+            {proposal.file_url && (
+              <Card className="shadow-2xl hover:shadow-3xl transition-shadow duration-300 border-0 overflow-hidden">
+                <CardHeader 
+                  className="text-white"
+                  style={{ background: '#424242' }}
+                >
+                  <CardTitle className="flex items-center gap-2 text-lg">
+                    <FileText className="h-5 w-5" />
+                    File Proposal
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-6" style={{ backgroundColor: '#F7F7F7' }}>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-gray-600 mb-1">File tersimpan di IPFS</p>
+                      <p className="text-xs text-gray-500 break-all">{proposal.file_url.split('/').pop()}</p>
+                    </div>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={handleDownload}
+                      className="shrink-0 ml-2 border-2"
+                      style={{ 
+                        borderColor: '#C59560',
+                        color: '#C59560'
+                      }}
+                    >
+                      <ExternalLink className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Action Buttons */}
+            <Card className="shadow-2xl border-0" style={{ backgroundColor: '#F7F7F7' }}>
+              <CardHeader>
+                <CardTitle className="text-center" style={{ color: '#3338A0' }}>Aksi Review</CardTitle>
+              </CardHeader>
+              <CardContent className="p-6 space-y-4">
+                <Button 
+                  onClick={handleReject}
+                  variant="outline" 
+                  className="w-full border-2 shadow-lg hover:shadow-xl transition-all duration-200"
+                  style={{ 
+                    backgroundColor: '#FEF2F2',
+                    color: '#DC2626',
+                    borderColor: '#FCA5A5'
+                  }}
+                >
+                  <XCircle className="mr-2 h-4 w-4" />
+                  Tolak Proposal
+                </Button>
+                <Button 
+                  onClick={handleApprove}
+                  className="w-full shadow-lg hover:shadow-xl transition-all duration-200 text-white"
+                  style={{ 
+                    background: 'linear-gradient(135deg, #22C55E 0%, #16A34A 100%)',
+                    border: 'none'
+                  }}
+                >
+                  <CheckCircle2 className="mr-2 h-4 w-4" />
+                  Setujui Proposal
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </div>
     </div>
-);
+  );
+};
 
 export default AuditorReviewPage;

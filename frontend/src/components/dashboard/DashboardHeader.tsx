@@ -41,7 +41,7 @@ export const DashboardHeader = () => {
   return (
     <div className="space-y-6 mb-8">
       <div className="space-y-2">
-        <h1 className="text-3xl font-bold text-primary">Dashboard Transparansi APBN</h1>
+        <h1 className="text-3xl font-bold" style={{ color: '#3338A0' }}>Dashboard Transparansi APBN</h1>
         <p className="text-muted-foreground">
           Platform transparansi distribusi Anggaran Pendapatan dan Belanja Negara berbasis blockchain
         </p>
