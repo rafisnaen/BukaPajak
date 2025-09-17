@@ -13,6 +13,4 @@ type Proyek struct {
 	Status    string     `json:"status,omitempty"`
 	Kategori  string     `json:"kategori,omitempty"`
 	Alamat    string     `json:"alamat,omitempty"`
-	// 👇 TAMBAHKAN BARIS INI
-	UserID int64 `json:"user_id"`
 }
