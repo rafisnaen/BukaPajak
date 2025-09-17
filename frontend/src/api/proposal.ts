@@ -136,3 +136,22 @@ export const getProposalWithDetails = async (id: number): Promise<Proposal> => {
     throw error;
   }
 };
+export const acceptProposal = async (id: number): Promise<Proposal> => {
+  try {
+    const response = await api.post(`/api/v1/proposals/${id}/accept`);
+    return response.data.data; // asumsinya response punya { message, data }
+  } catch (error: any) {
+    console.error(`Error accepting proposal with id ${id}:`, error);
+    throw error;
+  }
+};
+
+export const rejectProposal = async (id: number): Promise<Proposal> => {
+  try {
+    const response = await api.post(`/api/v1/proposals/${id}/reject`);
+    return response.data.data; // asumsinya response punya { message, data }
+  } catch (error: any) {
+    console.error(`Error rejecting proposal with id ${id}:`, error);
+    throw error;
+  }
+};

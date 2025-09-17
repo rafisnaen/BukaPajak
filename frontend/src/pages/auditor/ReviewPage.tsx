@@ -23,7 +23,7 @@ import {
   Building2
 } from "lucide-react";
 import { toast } from "sonner";
-import { getProposalWithDetails, Proposal } from "@/api/proposal";
+import { getProposalWithDetails, Proposal, acceptProposal, rejectProposal } from "@/api/proposal";
 import { formatLongDate } from "@/utils/dateFormatter";
 
 const AuditorReviewPage = () => {
@@ -73,13 +73,47 @@ const AuditorReviewPage = () => {
     }
   };
 
-  const handleApprove = () => {
-    toast.success("Proposal telah disetujui!");
-  };
+    const handleApprove = async () => {
+    if (!id) return;
 
-  const handleReject = () => {
-    toast.error("Proposal telah ditolak!");
-  };
+    try {
+        toast.loading("Menyetujui proposal...");
+        const updatedProposal = await acceptProposal(Number(id));
+        setProposal(updatedProposal);
+        toast.success("Proposal telah disetujui!");
+    } catch (error: any) {
+        console.error("Error approving proposal:", error);
+        const errorMessage =
+        error.response?.data?.error ||
+        error.response?.data?.message ||
+        error.message ||
+        "Gagal menyetujui proposal";
+        toast.error(errorMessage);
+    } finally {
+        toast.dismiss(); // hapus loading toast
+    }
+    };
+
+    const handleReject = async () => {
+    if (!id) return;
+
+    try {
+        toast.loading("Menolak proposal...");
+        const updatedProposal = await rejectProposal(Number(id));
+        setProposal(updatedProposal);
+        toast.error("Proposal telah ditolak!");
+    } catch (error: any) {
+        console.error("Error rejecting proposal:", error);
+        const errorMessage =
+        error.response?.data?.error ||
+        error.response?.data?.message ||
+        error.message ||
+        "Gagal menolak proposal";
+        toast.error(errorMessage);
+    } finally {
+        toast.dismiss();
+    }
+    };
 
   const getStatusConfig = (status: string) => {
     switch (status.toLowerCase()) {
