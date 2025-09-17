@@ -3,7 +3,7 @@ package models
 import "time"
 
 type Proyek struct {
-	ID        int64      `json:"id"`
+	ID        int64      `json:"id,omitempty"`
 	CreatedAt *time.Time `json:"created_at,omitempty"`
 	Judul     string     `json:"judul"`
 	Deskripsi string     `json:"deskripsi,omitempty"`
@@ -13,6 +13,4 @@ type Proyek struct {
 	Status    string     `json:"status,omitempty"`
 	Kategori  string     `json:"kategori,omitempty"`
 	Alamat    string     `json:"alamat,omitempty"`
-	// 👇 TAMBAHKAN BARIS INI
-	UserID int64 `json:"user_id"`
 }

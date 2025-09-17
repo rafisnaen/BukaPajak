@@ -1,9 +1,11 @@
 package handlers
 
 import (
+	"backend/configs"
 	"backend/models"
-	"backend/repositories"
+	"backend/repositories" // ✅ tambahkan ini
 	"backend/schemas"
+	"context"
 	"fmt"
 	"net/http"
 	"path/filepath"
@@ -11,82 +13,94 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	storage_go "github.com/supabase-community/storage-go"
 )
 
-type ProjectHandler struct {
-	Repo *repositories.ProjectRepository
-}
-
-func NewProjectHandler(repo *repositories.ProjectRepository) *ProjectHandler {
-	return &ProjectHandler{Repo: repo}
-}
-
-// POST /projects
-func (h *ProjectHandler) CreateProject(c *gin.Context) {
+func CreateProyekHandler(c *gin.Context) {
 	var req schemas.ProjectRequest
-	if err := c.ShouldBind(&req); err != nil { // pakai FormData
+	if err := c.ShouldBind(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	// Upload gambar (opsional)
-	file, _ := c.FormFile("gambar")
-	var filePath string
-	if file != nil {
-		filename := fmt.Sprintf("%d_%s", time.Now().Unix(), filepath.Base(file.Filename))
-		filePath = filepath.Join("uploads", filename)
-		if err := c.SaveUploadedFile(file, filePath); err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save image"})
-			return
-		}
-	}
-
+	// mapping request -> model
 	proyek := models.Proyek{
 		Judul:     req.Judul,
 		Deskripsi: req.Deskripsi,
 		Budget:    req.Budget,
-		GambarURL: filePath,
-		RegionID:  &req.RegionID,
-		Status:    "belum dimulai",
 		Kategori:  req.Kategori,
+		Alamat:    req.Alamat,
+		Status:    req.Status,
+	}
+	proyek.RegionID = &req.RegionID
+
+	// upload file ke Supabase (opsional, jika ada gambar)
+	file, err := c.FormFile("gambar")
+	if err == nil {
+		src, err := file.Open()
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "cannot open file"})
+			return
+		}
+		defer src.Close()
+
+		ext := filepath.Ext(file.Filename)
+		fileName := fmt.Sprintf("proyek_%d%s", time.Now().UnixNano(), ext)
+		ct := file.Header.Get("Content-Type")
+
+		_, err = configs.Storage.UploadFile(
+			"proposals",
+			fileName,
+			src,
+			storage_go.FileOptions{ContentType: &ct},
+		)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to upload file: " + err.Error()})
+			return
+		}
+
+		publicURL := fmt.Sprintf(
+			"https://%s.supabase.co/storage/v1/object/public/proposals/%s",
+			configs.SupabaseRef,
+			fileName,
+		)
+		proyek.GambarURL = publicURL
 	}
 
-	// Simpan project ke database
-	projectID, err := h.Repo.CreateProject(proyek) // ✅ ambil 2 return
+	// simpan ke database via repository
+	if err := repositories.CreateProyek(context.Background(), &proyek); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "Proyek created successfully",
+		"proyek":  proyek,
+	})
+}
+
+func GetAllProyekHandler(c *gin.Context) {
+	list, err := repositories.GetAllProyek(context.Background()) // ✅
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	proyek.ID = projectID // ✅ assign ID hasil insert
-
-	c.JSON(http.StatusOK, gin.H{"message": "Project created successfully", "data": proyek})
-
+	c.JSON(http.StatusOK, list)
 }
 
-// Get All Projects
-func (h *ProjectHandler) GetAllProjects(c *gin.Context) {
-	projects, err := h.Repo.GetAllProjects()
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch projects"})
-		return
-	}
-	c.JSON(http.StatusOK, gin.H{"data": projects})
-}
-
-// Get Project By ID
-func (h *ProjectHandler) GetProjectByID(c *gin.Context) {
+func GetProyekByIDHandler(c *gin.Context) {
 	idStr := c.Param("id")
-	id, err := strconv.Atoi(idStr)
+	id, err := strconv.ParseInt(idStr, 10, 64)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid id"})
 		return
 	}
 
-	project, err := h.Repo.GetProjectByID(id)
+	proyek, err := repositories.GetProyekByID(context.Background(), id) // ✅
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Project not found"})
+		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"data": project})
+	c.JSON(http.StatusOK, proyek)
 }

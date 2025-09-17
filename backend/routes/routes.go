@@ -14,19 +14,17 @@ func AuthRoutes(r *gin.Engine) {
 }
 
 func ProjectRoutes(r *gin.Engine) {
-	repo := repositories.NewProjectRepository()
-	projectHandler := handlers.NewProjectHandler(repo)
 
 	api := r.Group("/admin/projects")
 	api.Use(middlewares.AuthMiddleware())
 	{
-		api.POST("", projectHandler.CreateProject)
+		api.POST("", handlers.CreateProyekHandler)
 
 	}
 	Project := r.Group("/admin/projects")
 	{
-		Project.GET("", projectHandler.GetAllProjects)
-		Project.GET("/:id", projectHandler.GetProjectByID)
+		Project.GET("", handlers.GetAllProyekHandler)
+		Project.GET("/:id", handlers.GetProposalByIDHandler)
 	}
 }
 func RegionRoutes(r *gin.Engine) {
@@ -113,7 +111,7 @@ func ProposalRoutes(r *gin.Engine) {
 	api.Use(middlewares.AuthMiddleware())
 	{
 		// Rute untuk membuat project + proposal sekaligus
-		api.POST("/proposals/full", handlers.UploadProposalAndProjectHandler)
+		api.POST("/proposals/full", handlers.UploadProposalHandler)
 
 		// Rute untuk mendapatkan semua proposal (mungkin untuk admin/auditor)
 		api.GET("/proposals", handlers.GetAllProposalsHandler)

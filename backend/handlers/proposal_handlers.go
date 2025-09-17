@@ -1,5 +1,3 @@
-// backend/handlers/proposal_handlers.go
-
 package handlers
 
 import (
@@ -19,212 +17,68 @@ import (
 	storage_go "github.com/supabase-community/storage-go"
 )
 
-// ... (fungsi lain tetap sama) ...
-
-// Enhanced handler with better file handling and error recovery
-// fmt.Println("📥 Mulai proses upload proposal + project")
-func UploadProposalAndProjectHandler(c *gin.Context) {
-	fmt.Println("📥 Mulai proses upload proposal + project")
-
-	// Ambil user ID dari context (token)
+// POST /proposals
+func UploadProposalHandler(c *gin.Context) {
 	userIDRaw, exists := c.Get("userId")
 	if !exists {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "User ID not found in token"})
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not authenticated"})
 		return
 	}
 
-	var userID int64
-	switch v := userIDRaw.(type) {
-	case string:
-		parsed, err := strconv.ParseInt(v, 10, 64)
-		if err != nil {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid user ID format"})
-			return
-		}
-		userID = parsed
-	case int:
-		userID = int64(v)
-	case int64:
-		userID = v
-	default:
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid user ID type"})
-		return
-	}
+	userID, _ := strconv.ParseInt(fmt.Sprint(userIDRaw), 10, 64)
 
-	// Ambil form data
-	projectName := strings.TrimSpace(c.PostForm("judul"))
-	category := strings.TrimSpace(c.PostForm("kategori"))
-	description := strings.TrimSpace(c.PostForm("deskripsi"))
-	regionIDStr := strings.TrimSpace(c.PostForm("region_id"))
-	budgetStr := strings.TrimSpace(c.PostForm("budget"))
-	alamat := strings.TrimSpace(c.PostForm("alamat")) // PERBAIKAN: Baca field alamat
-
-	// Validasi wajib isi
-	validationErrors := make(map[string]string)
-	if projectName == "" {
-		validationErrors["judul"] = "Judul proyek wajib diisi"
-	}
-	if category == "" {
-		validationErrors["kategori"] = "Kategori proyek wajib diisi"
-	}
-	if description == "" {
-		validationErrors["deskripsi"] = "Deskripsi proyek wajib diisi"
-	}
-	if budgetStr == "" {
-		validationErrors["budget"] = "Budget wajib diisi"
-	}
-	if alamat == "" { // PERBAIKAN: Tambahkan validasi untuk alamat
-		validationErrors["alamat"] = "Alamat wajib diisi"
-	}
-	if len(validationErrors) > 0 {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Validasi gagal", "details": validationErrors})
-		return
-	}
-
-	// Parse budget
-	budget, err := strconv.ParseFloat(budgetStr, 64)
-	if err != nil || budget <= 0 {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Format budget tidak valid"})
-		return
-	}
-
-	// Parse region_id -> int64
-	var regionID *int64
-	if regionIDStr != "" {
-		rid, err := strconv.ParseInt(regionIDStr, 10, 64)
-		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Format region_id tidak valid"})
-			return
-		}
-
-		// Cek region ada/tidak
-		repo := repositories.NewProjectRepository()
-		exists, err := repo.CheckRegionExists(rid)
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Gagal validasi provinsi", "details": err.Error()})
-			return
-		}
-		if !exists {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Provinsi tidak valid"})
-			return
-		}
-		regionID = &rid
-	}
-
-	// Validasi file
-	imageFile, err := c.FormFile("gambar")
+	projectIDStr := c.PostForm("project_id")
+	projectID, err := strconv.ParseInt(projectIDStr, 10, 64)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "File gambar wajib diupload"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid project_id"})
 		return
 	}
+
+	// File proposal wajib
 	proposalFile, err := c.FormFile("proposal")
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "File proposal wajib diupload"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Proposal file is required"})
 		return
 	}
 
-	// Validasi ukuran file
-	const maxImageSize = 5 * 1024 * 1024     // 5MB
-	const maxProposalSize = 10 * 1024 * 1024 // 10MB
-	if imageFile.Size > maxImageSize {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Ukuran gambar tidak boleh lebih dari 5MB"})
-		return
-	}
-	if proposalFile.Size > maxProposalSize {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Ukuran file proposal tidak boleh lebih dari 10MB"})
+	// Validasi PDF
+	if filepath.Ext(proposalFile.Filename) != ".pdf" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Proposal must be PDF"})
 		return
 	}
 
-	// Validasi ekstensi
-	imageExt := strings.ToLower(filepath.Ext(imageFile.Filename))
-	if imageExt != ".jpg" && imageExt != ".jpeg" && imageExt != ".png" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Format gambar harus JPG/PNG"})
-		return
-	}
-	if strings.ToLower(filepath.Ext(proposalFile.Filename)) != ".pdf" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Format proposal harus PDF"})
-		return
-	}
-
-	// Upload gambar (retry 3x)
-	var imageURL string
-	maxRetries := 3
-	for retry := 0; retry < maxRetries; retry++ {
-		imageURL, err = UploadFileToSupabase(imageFile)
-		if err == nil {
-			break
-		}
-		if retry == maxRetries-1 {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Gagal upload gambar", "details": err.Error()})
-			return
-		}
-		time.Sleep(time.Second * time.Duration(retry+1))
-	}
-
-	// Buat object proyek
-	proyek := models.Proyek{
-		Judul:     projectName,
-		Deskripsi: description,
-		Budget:    budget,
-		GambarURL: imageURL,
-		RegionID:  regionID,
-		Status:    "belum dimulai",
-		Kategori:  category,
-		Alamat:    alamat,
-		// 👇 TAMBAHKAN BARIS INI
-		UserID: userID,
-	}
-
-	// Insert proyek ke DB
-	repo := repositories.NewProjectRepository()
-	projectID, err := repo.CreateProject(proyek)
+	proposalURL, err := UploadFileToSupabase(proposalFile)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Gagal membuat proyek", "details": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error":   "Gagal upload proposal",
+			"details": err.Error(),
+		})
 		return
 	}
-	proyek.ID = projectID
 
-	// Upload proposal (retry 3x)
-	var proposalURL string
-	for retry := 0; retry < maxRetries; retry++ {
-		proposalURL, err = UploadFileToSupabase(proposalFile)
-		if err == nil {
-			break
-		}
-		if retry == maxRetries-1 {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Gagal upload proposal", "details": err.Error()})
-			return
-		}
-		time.Sleep(time.Second * time.Duration(retry+1))
-	}
-
-	// Insert proposal ke DB
 	proposal := models.Proposal{
 		FileURL:        proposalURL,
 		StatusProposal: "menunggu",
 		UserID:         userID,
 		ProjectID:      projectID,
 	}
+
 	if err := repositories.CreateProposal(proposal); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Gagal membuat proposal", "details": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error":   "Gagal menyimpan proposal",
+			"details": err.Error(),
+		})
 		return
 	}
 
-	// Response sukses
 	c.JSON(http.StatusOK, gin.H{
-		"success": true,
-		"message": "Proposal & proyek berhasil dibuat",
-		"data": gin.H{
-			"project_id": projectID,
-			"project":    proyek,
-			"proposal":   proposal,
-		},
+		"message": "Proposal berhasil diupload",
+		"data":    proposal,
 	})
 }
 
 // Enhanced file upload with better error handling
 func UploadFileToSupabase(file *multipart.FileHeader) (string, error) {
-
 	if !configs.IsStorageEnabled() {
 		return "", fmt.Errorf("fitur storage tidak aktif, periksa konfigurasi server")
 	}
@@ -238,6 +92,7 @@ func UploadFileToSupabase(file *multipart.FileHeader) (string, error) {
 	// Create unique file path
 	ext := filepath.Ext(file.Filename)
 	fileName := strings.TrimSuffix(filepath.Base(file.Filename), ext)
+
 	// Clean filename to avoid issues
 	fileName = strings.ReplaceAll(fileName, " ", "_")
 	fileName = strings.ReplaceAll(fileName, "(", "")
@@ -282,9 +137,13 @@ func UploadFileToSupabase(file *multipart.FileHeader) (string, error) {
 func GetAllProposalsHandler(c *gin.Context) {
 	proposals, err := repositories.GetAllProposals()
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch proposals", "details": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error":   "Failed to fetch proposals",
+			"details": err.Error(),
+		})
 		return
 	}
+
 	c.JSON(http.StatusOK, proposals)
 }
 
@@ -305,9 +164,13 @@ func GetUserProposalsHandler(c *gin.Context) {
 
 	proposals, err := repositories.GetProposalsByUser(int64(userID))
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch user proposals", "details": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error":   "Failed to fetch user proposals",
+			"details": err.Error(),
+		})
 		return
 	}
+
 	c.JSON(http.StatusOK, proposals)
 }
 
@@ -322,7 +185,10 @@ func GetProposalByIDHandler(c *gin.Context) {
 
 	proposal, err := repositories.GetProposalByID(id)
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Proposal not found", "details": err.Error()})
+		c.JSON(http.StatusNotFound, gin.H{
+			"error":   "Proposal not found",
+			"details": err.Error(),
+		})
 		return
 	}
 

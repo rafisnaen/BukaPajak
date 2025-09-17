@@ -1,103 +1,128 @@
-// backend/repositories/proyek_repository.go
 package repositories
 
 import (
 	"backend/configs"
 	"backend/models"
+	"context"
+	"encoding/json"
+	"errors"
 	"fmt"
+	"log"
 	"strconv"
+	"strings"
 )
 
-type ProjectRepository struct{}
+var ValidStatus = []string{"belum dimulai", "berlangsung", "selesai"}
+var ValidKategori = []string{"infrastruktur", "pendidikan", "kesehatan", "pertahanan"}
 
-func NewProjectRepository() *ProjectRepository {
-	return &ProjectRepository{}
+// --- Validation Helpers ---
+func isValidEnum(value string, validList []string) bool {
+	for _, v := range validList {
+		if v == value {
+			return true
+		}
+	}
+	return false
 }
 
-func (r *ProjectRepository) CreateProject(project models.Proyek) (int64, error) {
-	fmt.Printf("DEBUG: Inserting project to database: %+v\n", project)
-
-	insertData := map[string]interface{}{
-		"judul":      project.Judul,
-		"deskripsi":  project.Deskripsi,
-		"budget":     project.Budget,
-		"gambar_url": project.GambarURL,
-		"status":     project.Status,
-		"kategori":   project.Kategori,
-		"alamat":     project.Alamat,
-		// 👇 TAMBAHKAN BARIS INI
-		"user_id": project.UserID,
+// --- Repository Functions ---
+func CreateProyek(ctx context.Context, proyek *models.Proyek) error {
+	// --- Normalisasi & validasi status ---
+	if proyek.Status != "" {
+		proyek.Status = strings.ToLower(proyek.Status)
+		if !isValidEnum(proyek.Status, ValidStatus) {
+			return fmt.Errorf("invalid status: %s (must be one of %v)", proyek.Status, ValidStatus)
+		}
 	}
 
-	if project.RegionID != nil {
-		insertData["region_id"] = *project.RegionID
+	// --- Normalisasi & validasi kategori ---
+	if proyek.Kategori != "" {
+		proyek.Kategori = strings.ToLower(proyek.Kategori)
+		if !isValidEnum(proyek.Kategori, ValidKategori) {
+			return fmt.Errorf("invalid kategori: %s (must be one of %v)", proyek.Kategori, ValidKategori)
+		}
 	}
 
-	var inserted []models.Proyek
-
-	count, err := configs.Supabase.
-		From("proyek").
-		Insert(insertData, false, "", "representation", "").
-		ExecuteTo(&inserted)
-
-	if err != nil {
-		fmt.Printf("DEBUG: Supabase insert error: %v\n", err)
-		return 0, fmt.Errorf("supabase insert failed: %w", err)
+	// --- Dereference region_id biar gak kirim pointer ---
+	var regionID interface{}
+	if proyek.RegionID != nil {
+		regionID = *proyek.RegionID
+	} else {
+		regionID = nil
 	}
 
-	if count == 0 {
-		fmt.Printf("DEBUG: No rows were inserted\n")
-		return 0, fmt.Errorf("no rows were inserted")
+	// --- Mapping struct -> map ---
+	data := map[string]interface{}{
+		"judul":      proyek.Judul,
+		"deskripsi":  proyek.Deskripsi,
+		"budget":     proyek.Budget,
+		"gambar_url": proyek.GambarURL,
+		"region_id":  regionID,
+		"status":     proyek.Status,
+		"kategori":   proyek.Kategori,
+		"alamat":     proyek.Alamat,
 	}
 
-	if len(inserted) == 0 {
-		fmt.Printf("DEBUG: No project returned from insert\n")
-		return 0, fmt.Errorf("no project returned from insert")
-	}
+	log.Printf("📝 Inserting proyek: %+v", data)
 
-	fmt.Printf("DEBUG: Project inserted successfully with ID: %d\n", inserted[0].ID)
-	return inserted[0].ID, nil
-}
-
-func (r *ProjectRepository) CheckRegionExists(regionID int64) (bool, error) {
-	var regions []models.Region
+	var created []models.Proyek
 	_, err := configs.Supabase.
-		From("region_data").
-		Select("id", "", false).
-		Eq("id", strconv.FormatInt(regionID, 10)).
-		ExecuteTo(&regions)
+		From("proyek").
+		Insert(data, true, "", "", ""). // ✅ return representation
+		ExecuteTo(&created)
 
 	if err != nil {
-		return false, err
+		return fmt.Errorf("failed to insert proyek: %w", err)
 	}
-	return len(regions) > 0, nil
+	if len(created) == 0 {
+		return errors.New("insert failed: no proyek returned")
+	}
+
+	// update pointer supaya ID ikut keisi
+	*proyek = created[0]
+	return nil
 }
 
-func (r *ProjectRepository) GetAllProjects() ([]models.Proyek, error) {
-	var projects []models.Proyek
-	_, err := configs.Supabase.From("proyek").
+func GetAllProyek(ctx context.Context) ([]models.Proyek, error) {
+	var proyekList []models.Proyek
+
+	data, _, err := configs.Supabase.
+		From("proyek").
 		Select("*", "", false).
-		ExecuteTo(&projects)
+		Execute()
 
 	if err != nil {
-		return nil, fmt.Errorf("failed to fetch projects: %w", err)
+		return nil, fmt.Errorf("failed to fetch proyek: %w", err)
 	}
-	return projects, nil
+
+	if err := json.Unmarshal(data, &proyekList); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal proyek: %w", err)
+	}
+
+	return proyekList, nil
 }
 
-func (r *ProjectRepository) GetProjectByID(id int) (*models.Proyek, error) {
-	var projects []models.Proyek
-	_, err := configs.Supabase.From("proyek").
+func GetProyekByID(ctx context.Context, id int64) (*models.Proyek, error) {
+	var proyek []models.Proyek
+
+	idStr := strconv.FormatInt(id, 10)
+	data, _, err := configs.Supabase.
+		From("proyek").
 		Select("*", "", false).
-		Eq("id", strconv.Itoa(id)).
-		ExecuteTo(&projects)
+		Eq("id", idStr).
+		Execute()
 
 	if err != nil {
-		return nil, fmt.Errorf("failed to fetch project: %w", err)
-	}
-	if len(projects) == 0 {
-		return nil, fmt.Errorf("project not found")
+		return nil, fmt.Errorf("failed to fetch proyek by id: %w", err)
 	}
 
-	return &projects[0], nil
+	if err := json.Unmarshal(data, &proyek); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal proyek: %w", err)
+	}
+
+	if len(proyek) == 0 {
+		return nil, errors.New("proyek not found")
+	}
+
+	return &proyek[0], nil
 }

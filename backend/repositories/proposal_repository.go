@@ -6,73 +6,57 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"time"
+	"log"
 )
 
-// ✅ Create proposal with better error handling
+// ✅ Insert proposal dan langsung return row dari Supabase
+
+// CreateProposal menyimpan proposal baru ke tabel proposals
 func CreateProposal(proposal models.Proposal) error {
-	insertData := map[string]interface{}{
-		"file_url":        proposal.FileURL,
-		"status_proposal": proposal.StatusProposal,
-		"user_id":         proposal.UserID,
-		"project_id":      proposal.ProjectID,
-		"created_at":      time.Now(),
-		"updated_at":      time.Now(),
-	}
-
-	fmt.Printf("DEBUG Insert Proposal Data: %+v\n", insertData)
-
-	var inserted []models.Proposal
-	count, err := configs.Supabase.
-		From("proposals").
-		Insert(insertData, false, "", "representation", "").
-		ExecuteTo(&inserted)
-
-	if err != nil {
-		return fmt.Errorf("supabase insert failed: %w", err)
-	}
-	if count == 0 || len(inserted) == 0 {
-		return fmt.Errorf("no rows were inserted")
-	}
-	return nil
-}
-
-// ✅ Insert proposal (alternative method)
-func InsertProposal(proposal models.Proposal) (models.Proposal, error) {
-	fmt.Printf("DEBUG: Alternative proposal insert: %+v\n", proposal)
-
-	insertData := map[string]interface{}{
+	// Data yang akan diinsert (tanpa created_at / updated_at)
+	data := map[string]interface{}{
 		"file_url":        proposal.FileURL,
 		"status_proposal": proposal.StatusProposal,
 		"user_id":         proposal.UserID,
 		"project_id":      proposal.ProjectID,
 	}
+
+	log.Printf("📝 DEBUG Insert Proposal Data: %+v", data)
 
 	var created []models.Proposal
-	count, err := configs.Supabase.
+
+	// Execute() return (data []byte, count int, err error)
+	resp, _, err := configs.Supabase.
 		From("proposals").
-		Insert(insertData, false, "", "representation", "").
-		ExecuteTo(&created)
+		Insert(data, true, "", "", ""). // return representation
+		Execute()
 
 	if err != nil {
-		fmt.Printf("DEBUG: Alternative proposal insert error: %v\n", err)
-		return models.Proposal{}, fmt.Errorf("proposal insert failed: %w", err)
+		log.Printf("❌ Supabase Insert Error: %v", err)
+		return fmt.Errorf("failed to insert proposal: %w", err)
 	}
 
-	// Check count instead of status
-	if count == 0 {
-		return models.Proposal{}, fmt.Errorf("no proposal rows were inserted")
+	// Debug raw response dari Supabase
+	log.Printf("📦 Supabase Raw Response: %s", string(resp))
+
+	// Unmarshal JSON ke struct Proposal
+	if err := json.Unmarshal(resp, &created); err != nil {
+		log.Printf("❌ JSON Unmarshal Error: %v", err)
+		return fmt.Errorf("failed to unmarshal proposal response: %w", err)
 	}
 
 	if len(created) == 0 {
-		return models.Proposal{}, fmt.Errorf("no proposal returned from insert")
+		return errors.New("insert failed: no proposal returned")
 	}
 
-	fmt.Printf("DEBUG: Alternative proposal inserted successfully: %+v\n", created[0])
-	return created[0], nil
+	// Update proposal dengan data dari DB
+	proposal = created[0]
+
+	log.Printf("✅ Proposal berhasil dibuat: %+v", proposal)
+	return nil
 }
 
-// Get proposals by user_id
+// ✅ Get proposals by user_id
 func GetProposalsByUser(userID int64) ([]models.Proposal, error) {
 	data, _, err := configs.Supabase.
 		From("proposals").
@@ -91,7 +75,7 @@ func GetProposalsByUser(userID int64) ([]models.Proposal, error) {
 	return proposals, nil
 }
 
-// Get all proposals
+// ✅ Get all proposals
 func GetAllProposals() ([]models.Proposal, error) {
 	data, _, err := configs.Supabase.
 		From("proposals").
@@ -109,7 +93,7 @@ func GetAllProposals() ([]models.Proposal, error) {
 	return proposals, nil
 }
 
-// Get proposal by ID
+// ✅ Get proposal by ID
 func GetProposalByID(id int64) (models.Proposal, error) {
 	data, _, err := configs.Supabase.
 		From("proposals").
