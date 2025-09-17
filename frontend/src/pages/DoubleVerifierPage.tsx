@@ -4,6 +4,8 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import djpImage from "@/assets/djp-ri.svg";
+
 import {
   Card,
   CardContent,
@@ -68,11 +70,17 @@ const DoubleVerifierPage = () => {
 
   return (
     <div className="double-verifier-page">
-      <div className="background-gradient"></div>
-       {/* Floating Elements */}
-       <div className="absolute top-20 left-10 w-4 h-4 rounded-full bg-accent animate-float opacity-60" />
-      <div className="absolute top-40 right-20 w-6 h-6 rounded-full bg-white/30 animate-float animation-delay-1000 opacity-40" />
-      <div className="absolute bottom-32 left-1/4 w-3 h-3 rounded-full bg-secondary animate-pulse-glow opacity-50" />
+       {/* Background Image */}
+      <div className="absolute inset-0">
+        <img
+          src={djpImage}
+          alt="Government building background"
+          className="w-full h-full object-cover"
+        />
+        <div className="absolute inset-0 bg-gradient-overlay"></div>
+      </div>
+
+      {/* Content */}
       <Card className="w-full max-w-md shadow-lg relative z-10 bg-card/90 backdrop-blur-sm">
         <CardHeader className="text-center space-y-2">
             <div className="flex justify-center mb-4">
