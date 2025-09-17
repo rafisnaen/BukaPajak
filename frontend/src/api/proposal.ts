@@ -61,6 +61,12 @@ export const getAllProposalsProjects = async (): Promise<Proposal[]> => {
   const response = await api.get('/api/v1/proposals/projects');
   return response.data;
 };
+export const getAllProposalsProjects_Acc = async (): Promise<Proposal[]> => {
+  const response = await api.get('/api/v1/proposals/projects');
+  
+  // hanya ambil yang status_proposal === "disetujui"
+  return response.data.filter((proposal: Proposal) => proposal.status_proposal === "disetujui");
+};
 
 export const getProposalById = async (id: number): Promise<Proposal> => {
   const response = await api.get<ProposalResponse>(`/api/v1/proposals/${id}`);
