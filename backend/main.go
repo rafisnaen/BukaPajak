@@ -53,6 +53,7 @@ func main() {
 	routes.RegionRoutes(r)
 	routes.ProposalRoutes(r)
 	routes.VerifikasiRoute(r)
+	routes.RouteIPFS(r)
 
 	// Health check endpoint
 	r.GET("/", func(c *gin.Context) {
