@@ -133,7 +133,8 @@ func RouteIPFS(r *gin.Engine) {
 	api := r.Group("")
 	api.Use(middlewares.AuthMiddleware())
 	{
-		api.POST("/proposal/upload", handlers.UploadProposalHandler_Pinata) // ✅ IPFS
+		api.POST("/proposal/upload", handlers.UploadProposalHandler_Pinata)
+		api.GET("/proposal/:id/upload", handlers.DownloadProposalHandler) // ✅ IPFS
 		// api.GET("/proposal/list", handlers.GetAllProposalsHandler_P)            // ✅ IPFS
 		// api.GET("/proposal/:id", handlers.GetProposalByIDHandler_IPFS)          // ✅ IPFS
 		// api.GET("/proposal/user", handlers.GetUserProposalsHandler_IPFS)        // ✅ IPFS

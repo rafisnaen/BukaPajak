@@ -14,3 +14,7 @@ type ProposalResponse struct {
 	FileURL        string `json:"file_url"`
 	StatusProposal string `json:"status_proposal"`
 }
+type ProposalDownloadResponse struct {
+	FileURL string `json:"file_url"`
+	CID     string `json:"cid,omitempty"`
+}

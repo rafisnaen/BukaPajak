@@ -4,6 +4,7 @@ import (
 	"backend/configs"
 	"backend/models"
 	"backend/repositories"
+	"backend/schemas"
 	"fmt"
 	"mime/multipart"
 	"net/http"
@@ -206,4 +207,37 @@ func GetAllProposalsWithDetailHandler(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, proposals)
+}
+
+func DownloadProposalHandler(c *gin.Context) {
+	// Ambil proposal ID dari param
+	idStr := c.Param("id")
+	id, err := strconv.ParseInt(idStr, 10, 64)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid proposal ID"})
+		return
+	}
+
+	// Ambil data proposal
+	proposal, err := repositories.GetProposalByID(id)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Proposal not found"})
+		return
+	}
+
+	// Ambil user ID dari token (jika auditor login)
+	userIDRaw, _ := c.Get("userId")
+	userID, _ := strconv.ParseInt(fmt.Sprint(userIDRaw), 10, 64)
+
+	// Ambil IP client
+	clientIP := c.ClientIP()
+
+	// Logging download
+	_ = repositories.LogProposalDownload(proposal.ID, userID, "pinata", clientIP)
+
+	// Return JSON berisi link file
+	c.JSON(http.StatusOK, schemas.ProposalDownloadResponse{
+		FileURL: proposal.FileURL,
+		CID:     proposal.CID,
+	})
 }

@@ -5,6 +5,8 @@ import "time"
 type Proposal struct {
 	ID             int64     `json:"id"`
 	FileURL        string    `json:"file_url"`
+	CID            string    `json:"cid,omitempty"`
+	GatewayURL     string    `json:"gateway_url,omitempty"`
 	CreatedAt      time.Time `json:"created_at"`
 	UpdatedAt      time.Time `json:"updated_at"`
 	StatusProposal string    `json:"status_proposal"`
