@@ -144,3 +144,11 @@ func RouteIPFS(r *gin.Engine) {
 		// api.PATCH("/proposal/:id/status", handlers.UpdateProposalStatusHandler) // masih sama
 	}
 }
+
+func TranserRoute(r *gin.Engine) {
+	api := r.Group("/api")
+	api.Use(middlewares.AuthMiddleware())
+	{
+		api.POST("/transfer", handlers.TransferHandler)
+	}
+}

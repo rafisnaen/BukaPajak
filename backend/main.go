@@ -54,6 +54,7 @@ func main() {
 	routes.ProposalRoutes(r)
 	routes.VerifikasiRoute(r)
 	routes.RouteIPFS(r)
+	routes.TranserRoute(r)
 
 	// Health check endpoint
 	r.GET("/", func(c *gin.Context) {
