@@ -122,6 +122,7 @@ func ProposalRoutes(r *gin.Engine) {
 		// Rute untuk mendapatkan detail proposal berdasarkan ID
 		api.GET("/proposals/:id", handlers.GetProposalByIDHandler)
 		api.GET("/proposals/projects", handlers.GetAllProposalsWithDetailHandler)
+		api.GET("/proposals/:id/projects", handlers.GetProposalWithDetailByIDHandler)
 	}
 }
 
@@ -136,7 +137,7 @@ func RouteIPFS(r *gin.Engine) {
 		api.POST("/proposal/upload", handlers.UploadProposalHandler_Pinata)
 		api.GET("/proposal/:id/upload", handlers.DownloadProposalHandler) // ✅ IPFS
 		// api.GET("/proposal/list", handlers.GetAllProposalsHandler_P)            // ✅ IPFS
-		// api.GET("/proposal/:id", handlers.GetProposalByIDHandler_IPFS)          // ✅ IPFS
+		api.GET("/proposal/:id", handlers.GetProposalByIDHandler_Pinata) // ✅ IPFS
 		// api.GET("/proposal/user", handlers.GetUserProposalsHandler_IPFS)        // ✅ IPFS
 		// api.PATCH("/proposal/:id/status", handlers.UpdateProposalStatusHandler) // masih sama
 	}
