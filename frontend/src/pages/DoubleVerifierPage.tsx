@@ -69,7 +69,7 @@ const DoubleVerifierPage = () => {
   };
 
   return (
-    <div className="double-verifier-page">
+    <div className="double-verifier-page">                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          
        {/* Background Image */}
       <div className="absolute inset-0">
         <img
