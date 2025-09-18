@@ -12,6 +12,8 @@ import RegisterPage from "./pages/RegisterPage";
 import DashboardPage from "./pages/DashboardPage";
 import Tentang from "./pages/Tentang";
 import DoubleVerifierPage from "./pages/DoubleVerifierPage";
+import Regional from "./pages/Regional";
+import Transparansi from "./pages/Transparansi"; // <-- TAMBAHKAN IMPORT INI
 
 // --- Halaman Pengusul ---
 import ProposerDashboardPage from "./pages/proposer/DashboardPage";
@@ -47,6 +49,12 @@ const App = () => (
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/tentang" element={<Tentang />} />
+          <Route path="/regional" element={<Regional />} />
+          
+          {/* --- Rute Transparansi --- */}
+          <Route path="/transparansi" element={<Transparansi />} /> {/* <-- TAMBAHKAN RUTE INI */}
+          <Route path="/transparansi/:provinceId" element={<Transparansi />} /> {/* <-- TAMBAHKAN RUTE DINAMIS INI */}
+
 
           {/* --- Rute Verifikasi (Protected) --- */}
           <Route
