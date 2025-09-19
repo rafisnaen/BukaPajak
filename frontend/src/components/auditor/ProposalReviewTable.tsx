@@ -108,7 +108,7 @@ export const ProposalReviewTable = () => {
             <TableHead>ID Proposal</TableHead>
             <TableHead>Nama Proyek</TableHead>
             <TableHead>Pengusul</TableHead>
-            <TableHead className="text-right">Jumlah (Rp)</TableHead>
+            <TableHead className="text-right">Jumlah (Eth)</TableHead>
             <TableHead>Status</TableHead>
             <TableHead>Tgl. Pengajuan</TableHead>
             <TableHead>Aksi</TableHead>
