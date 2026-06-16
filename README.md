@@ -1,5 +1,6 @@
 # BukaPajak
 ##### When Tax Distribution Have Broad & Wider View In Transparency 📄👀
+##### 10th of Pre-Elimination round
 
 ## Link Demo Video
 https://drive.google.com/file/d/1WwkWfwlOqsW9eaIgY3xe7A9KAIOTMR6O/view?usp=sharing
